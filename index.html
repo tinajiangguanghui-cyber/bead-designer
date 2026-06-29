@@ -236,7 +236,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 </head>
 <body>
 
-<!-- 首页 -->
 <div id="page-home" class="page active">
   <div class="home-header">
     <div class="logo">📿 串珠妙计</div>
@@ -248,7 +247,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 饰品类型选择面板 -->
 <div id="modal-template" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
@@ -260,7 +258,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 设计画布页 -->
 <div id="page-designer" class="page">
   <div class="designer-toolbar">
     <button class="btn-icon" id="btn-back" title="返回">←</button>
@@ -281,7 +278,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 珠子编辑面板 -->
 <div id="modal-bead-edit" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content bottom-sheet">
@@ -303,7 +299,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 导出面板 -->
 <div id="modal-export" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
@@ -329,7 +324,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 作品列表页 -->
 <div id="page-works" class="page">
   <div class="page-header">
     <button class="btn-icon" id="btn-works-back">←</button>
@@ -344,7 +338,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 保存命名弹窗 -->
 <div id="modal-save" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
@@ -359,7 +352,6 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 导出进度 -->
 <div id="modal-exporting" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content exporting-modal">
@@ -368,26 +360,18 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
-<!-- 全局Toast -->
 <div id="toast" class="toast"></div>
 
-
-
-<script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
 </script>
-<script type="module">
-import * as THREE from "three";
+
+<script>
+// 显示加载状态
+document.getElementById('hero-canvas').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
 
 // === beadData.js ===
 // 珠子数据配置 - 5种材质 × 多种形状颜色
-export const BEAD_MATERIALS = {
+const BEAD_MATERIALS = {
   crystal: { name: '水晶', roughness: 0.15, metalness: 0.05, opacity: 0.85, transmission: 0.4, ior: 1.5 },
   jade:     { name: '玉石', roughness: 0.3, metalness: 0.0, opacity: 1.0, transmission: 0.05, ior: 1.3 },
   wood:     { name: '木质', roughness: 0.7, metalness: 0.0, opacity: 1.0, transmission: 0.0, ior: 1.0 },
@@ -395,7 +379,7 @@ export const BEAD_MATERIALS = {
   ceramic:  { name: '陶瓷', roughness: 0.5, metalness: 0.0, opacity: 1.0, transmission: 0.0, ior: 1.2 }
 };
 
-export const BEAD_COLORS = {
+const BEAD_COLORS = {
   red:      { name: '红', hex: '#c0392b' },
   orange:   { name: '橙', hex: '#e67e22' },
   yellow:   { name: '黄', hex: '#f1c40f' },
@@ -413,7 +397,7 @@ export const BEAD_COLORS = {
 };
 
 // 珠子数据库 - MVP 60种
-export const BEAD_LIBRARY = buildBeadLibrary();
+const BEAD_LIBRARY = buildBeadLibrary();
 
 function buildBeadLibrary() {
   const beads = [];
@@ -494,7 +478,7 @@ function buildBeadLibrary() {
 }
 
 // 饰品类型模板
-export const TEMPLATES = [
+const TEMPLATES = [
   { id: 'bracelet_single', name: '手串·单圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 1, defaultLength: 160, desc: '单圈手串' },
   { id: 'bracelet_double', name: '手串·双圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 2, defaultLength: 320, desc: '双圈手串' },
   { id: 'bracelet_triple', name: '手串·三圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 3, defaultLength: 480, desc: '三圈手串' },
@@ -505,9 +489,81 @@ export const TEMPLATES = [
 ];
 
 
+// === workManager.js ===
+const STORAGE_KEY = 'bead_designer_works';
+
+class WorkManager {
+  constructor() {
+    this.works = this.loadWorks();
+  }
+
+  loadWorks() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveWorks() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.works));
+  }
+
+  addWork(name, designData, thumbnail) {
+    const work = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: name || `设计_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '')}`,
+      designData,
+      thumbnail: thumbnail || '',
+      createdAt: new Date().toISOString(),
+      beadCount: designData.beads ? designData.beads.length : 0
+    };
+    this.works.unshift(work);
+    this.saveWorks();
+    return work;
+  }
+
+  updateWork(id, designData, thumbnail) {
+    const work = this.works.find(w => w.id === id);
+    if (!work) return null;
+    work.designData = designData;
+    work.thumbnail = thumbnail || work.thumbnail;
+    work.beadCount = designData.beads ? designData.beads.length : 0;
+    work.updatedAt = new Date().toISOString();
+    this.saveWorks();
+    return work;
+  }
+
+  deleteWork(id) {
+    this.works = this.works.filter(w => w.id !== id);
+    this.saveWorks();
+  }
+
+  renameWork(id, newName) {
+    const work = this.works.find(w => w.id === id);
+    if (!work) return;
+    work.name = newName;
+    this.saveWorks();
+  }
+
+  getWork(id) {
+    return this.works.find(w => w.id === id);
+  }
+
+  getAllWorks() {
+    return [...this.works];
+  }
+
+  getCount() {
+    return this.works.length;
+  }
+}
+
+
 // === renderer.js ===
-// import handled by module scope
-export class BeadRenderer {
+
+class BeadRenderer {
   constructor(canvasContainer) {
     this.container = canvasContainer;
     this.scene = new THREE.Scene();
@@ -870,9 +926,9 @@ export class BeadRenderer {
 
 
 // === designEngine.js ===
-// import handled by module scope
-// import handled by module scope
-export class DesignEngine {
+
+
+class DesignEngine {
   constructor(renderer) {
     this.renderer = renderer;
     this.template = TEMPLATES[0];
@@ -1211,83 +1267,11 @@ export class DesignEngine {
 }
 
 
-// === workManager.js ===
-const STORAGE_KEY = 'bead_designer_works';
-
-export class WorkManager {
-  constructor() {
-    this.works = this.loadWorks();
-  }
-
-  loadWorks() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  saveWorks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.works));
-  }
-
-  addWork(name, designData, thumbnail) {
-    const work = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      name: name || `设计_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '')}`,
-      designData,
-      thumbnail: thumbnail || '',
-      createdAt: new Date().toISOString(),
-      beadCount: designData.beads ? designData.beads.length : 0
-    };
-    this.works.unshift(work);
-    this.saveWorks();
-    return work;
-  }
-
-  updateWork(id, designData, thumbnail) {
-    const work = this.works.find(w => w.id === id);
-    if (!work) return null;
-    work.designData = designData;
-    work.thumbnail = thumbnail || work.thumbnail;
-    work.beadCount = designData.beads ? designData.beads.length : 0;
-    work.updatedAt = new Date().toISOString();
-    this.saveWorks();
-    return work;
-  }
-
-  deleteWork(id) {
-    this.works = this.works.filter(w => w.id !== id);
-    this.saveWorks();
-  }
-
-  renameWork(id, newName) {
-    const work = this.works.find(w => w.id === id);
-    if (!work) return;
-    work.name = newName;
-    this.saveWorks();
-  }
-
-  getWork(id) {
-    return this.works.find(w => w.id === id);
-  }
-
-  getAllWorks() {
-    return [...this.works];
-  }
-
-  getCount() {
-    return this.works.length;
-  }
-}
-
-
 // === main.js ===
-// import handled by module scope
-// import handled by module scope
-// import handled by module scope
-// import handled by module scope
+
+
+
+
 class App {
   constructor() {
     try {
@@ -1875,32 +1859,29 @@ class App {
 }
 
 // 启动应用 - 兼容多种加载时序
-function bootstrap() {
-  if (window.app) return;
-  try {
-    window.app = new App();
-  } catch (e) {
-    console.error('App bootstrap failed:', e);
-    // 确保基本UI可见
-    const home = document.getElementById('page-home');
-    if (home) home.classList.add('active');
-    const hero = document.getElementById('hero-canvas');
-    if (hero && !hero.innerHTML.trim()) {
-      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
-    }
-  }
-}
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrap);
-} else {
+
+ else {
   bootstrap();
 }
 
 // 导入THREE（全局引用，用于首页预览）
-// import handled by module scope
+
 window.THREE = THREE;
 
+
+// 启动应用
+window.addEventListener('DOMContentLoaded', function() {
+  console.log('App starting...');
+  try {
+    window.app = new App();
+    console.log('App started successfully');
+  } catch(e) {
+    console.error('App start error:', e);
+    document.getElementById('page-home').classList.add('active');
+  }
+});
 </script>
+
 </body>
 </html>
