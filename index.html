@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>串珠妙计 - 在线手串设计</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 首页 -->
+<div id="page-home" class="page active">
+  <div class="home-header">
+    <div class="logo">📿 串珠妙计</div>
+  </div>
+  <div class="home-hero" id="hero-canvas"></div>
+  <div class="home-actions">
+    <button class="btn-primary btn-large" id="btn-start-design">开始设计</button>
+    <button class="btn-secondary" id="btn-my-works">我的作品 <span id="works-count">0</span></button>
+  </div>
+</div>
+
+<!-- 饰品类型选择面板 -->
+<div id="modal-template" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>选择饰品类型</h3>
+      <button class="btn-close" id="btn-close-template">&times;</button>
+    </div>
+    <div class="template-grid" id="template-grid"></div>
+  </div>
+</div>
+
+<!-- 设计画布页 -->
+<div id="page-designer" class="page">
+  <div class="designer-toolbar">
+    <button class="btn-icon" id="btn-back" title="返回">←</button>
+    <span class="current-template" id="current-template-name">手串·单圈</span>
+    <button class="btn-icon" id="btn-undo" title="撤销" disabled>↩</button>
+    <button class="btn-icon" id="btn-redo" title="重做" disabled>↪</button>
+    <button class="btn-icon" id="btn-save" title="保存">💾</button>
+    <button class="btn-icon btn-export" id="btn-export" title="导出">📷</button>
+  </div>
+  <div class="designer-canvas" id="designer-canvas"></div>
+  <div class="designer-info" id="designer-info">
+    <span>共 <strong id="bead-count">0</strong> 颗珠子</span>
+    <span>总长约 <strong id="total-length">0</strong>mm</span>
+  </div>
+  <div class="bead-panel" id="bead-panel">
+    <div class="bead-filters" id="bead-filters"></div>
+    <div class="bead-list" id="bead-list"></div>
+  </div>
+</div>
+
+<!-- 珠子编辑面板 -->
+<div id="modal-bead-edit" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content bottom-sheet">
+    <div class="modal-header">
+      <h3 id="edit-bead-name">珠子编辑</h3>
+      <button class="btn-close" id="btn-close-edit">&times;</button>
+    </div>
+    <div class="edit-form">
+      <div class="edit-row">
+        <label>尺寸</label>
+        <div class="size-options" id="edit-sizes"></div>
+      </div>
+      <div class="edit-row">
+        <label>颜色</label>
+        <div class="color-options" id="edit-colors"></div>
+      </div>
+      <button class="btn-danger" id="btn-delete-bead">删除这颗珠子</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出面板 -->
+<div id="modal-export" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>导出效果图</h3>
+      <button class="btn-close" id="btn-close-export">&times;</button>
+    </div>
+    <div class="export-options">
+      <div class="export-option" data-bg="transparent">
+        <div class="export-preview export-preview-transparent"></div>
+        <span>透明背景 PNG</span>
+      </div>
+      <div class="export-option" data-bg="white">
+        <div class="export-preview export-preview-white"></div>
+        <span>白色背景 JPG</span>
+      </div>
+      <div class="export-option" data-bg="gradient">
+        <div class="export-preview export-preview-gradient"></div>
+        <span>渐变背景 JPG</span>
+      </div>
+    </div>
+    <button class="btn-primary btn-block" id="btn-confirm-export">确认导出</button>
+  </div>
+</div>
+
+<!-- 作品列表页 -->
+<div id="page-works" class="page">
+  <div class="page-header">
+    <button class="btn-icon" id="btn-works-back">←</button>
+    <h3>我的作品</h3>
+  </div>
+  <div class="works-grid" id="works-grid">
+    <div class="works-empty">
+      <div class="empty-icon">📿</div>
+      <p>还没有作品</p>
+      <button class="btn-primary" id="btn-works-create">去设计第一个吧</button>
+    </div>
+  </div>
+</div>
+
+<!-- 保存命名弹窗 -->
+<div id="modal-save" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>保存作品</h3>
+      <button class="btn-close" id="btn-close-save">&times;</button>
+    </div>
+    <div class="save-form">
+      <input type="text" id="input-work-name" placeholder="输入作品名称" maxlength="30">
+      <button class="btn-primary btn-block" id="btn-confirm-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 导出进度 -->
+<div id="modal-exporting" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content exporting-modal">
+    <div class="exporting-spinner"></div>
+    <p>正在渲染图片...</p>
+  </div>
+</div>
+
+<!-- 全局Toast -->
+<div id="toast" class="toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
