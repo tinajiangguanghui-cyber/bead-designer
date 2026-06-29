@@ -23,10 +23,7 @@ class App {
   }
 
   init() {
-    // 检测WebGL支持
-    const hasWebGL = this.checkWebGL();
-
-    // 无论WebGL是否可用，都绑定UI事件
+    // 绑定UI事件（无论WebGL是否可用）
     this.bindHomeEvents();
     this.bindTemplateEvents();
     this.bindDesignerEvents();
@@ -36,21 +33,29 @@ class App {
     this.bindBeadEditEvents();
     this.updateWorksCount();
 
-    if (!hasWebGL) {
-      document.getElementById('hero-canvas').innerHTML =
-        '<div style="text-align:center;padding:40px;color:#c9956b;">📿<br><br>请使用支持WebGL的浏览器<br>体验3D手串设计</div>';
-      // 仍然允许查看作品列表等非3D功能
-      return;
+    // 尝试初始化3D，失败则降级
+    try {
+      const hasWebGL = this.checkWebGL();
+      if (!hasWebGL) {
+        console.warn('WebGL not available, running in fallback mode');
+        this.showWebGLFallback();
+        return;
+      }
+      // 初始化首页3D预览
+      setTimeout(() => this.initHomePreview(), 300);
+      // 初始化设计画布
+      setTimeout(() => this.initDesigner(), 500);
+    } catch (e) {
+      console.error('3D init error:', e);
+      this.showWebGLFallback();
     }
+  }
 
-    // 初始化首页3D预览
-    setTimeout(() => this.initHomePreview(), 300);
-
-    // 初始化设计画布
-    setTimeout(() => this.initDesigner(), 500);
-
-    // 更新作品数量
-    this.updateWorksCount();
+  showWebGLFallback() {
+    const hero = document.getElementById('hero-canvas');
+    if (hero) {
+      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
+    }
   }
 
   checkWebGL() {
@@ -584,10 +589,28 @@ class App {
   }
 }
 
-// 启动应用
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new App();
-});
+// 启动应用 - 兼容多种加载时序
+function bootstrap() {
+  if (window.app) return;
+  try {
+    window.app = new App();
+  } catch (e) {
+    console.error('App bootstrap failed:', e);
+    // 确保基本UI可见
+    const home = document.getElementById('page-home');
+    if (home) home.classList.add('active');
+    const hero = document.getElementById('hero-canvas');
+    if (hero && !hero.innerHTML.trim()) {
+      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
+    }
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrap);
+} else {
+  bootstrap();
+}
 
 // 导入THREE（全局引用，用于首页预览）
 import * as THREE from 'three';
