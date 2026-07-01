@@ -223,13 +223,13 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 <script>
 // ========== 数据定义 ==========
 const TEMPLATES = [
-  { id:'bracelet_single', name:'手串·单圈', icon:'💫', category:'手串', desc:'单圈手串' },
-  { id:'bracelet_double', name:'手串·双圈', icon:'💫', category:'手串', desc:'双圈手串' },
-  { id:'bracelet_triple', name:'手串·三圈', icon:'💫', category:'手串', desc:'三圈手串' },
-  { id:'necklace_short', name:'项链·短链', icon:'✨', category:'项链', desc:'短款项链' },
-  { id:'necklace_long', name:'项链·长链', icon:'✨', category:'项链', desc:'长款项链' },
-  { id:'earring', name:'耳环', icon:'💎', category:'耳环', desc:'垂坠耳环' },
-  { id:'phone_chain', name:'手机链', icon:'📱', category:'手机链', desc:'手机挂链' }
+  { id:'bracelet_single', name:'手串·单圈', icon:'💫', category:'手串', desc:'单圈手串', ropeType:'circle' },
+  { id:'bracelet_double', name:'手串·双圈', icon:'💫', category:'手串', desc:'双圈手串', ropeType:'circle' },
+  { id:'bracelet_triple', name:'手串·三圈', icon:'💫', category:'手串', desc:'三圈手串', ropeType:'circle' },
+  { id:'necklace_short', name:'项链·短链', icon:'✨', category:'项链', desc:'短款项链', ropeType:'uShape' },
+  { id:'necklace_long', name:'项链·长链', icon:'✨', category:'项链', desc:'长款项链', ropeType:'uShape' },
+  { id:'earring', name:'耳环', icon:'💎', category:'耳环', desc:'垂坠耳环', ropeType:'straight' },
+  { id:'phone_chain', name:'手机链', icon:'📱', category:'手机链', desc:'手机挂链', ropeType:'straight' }
 ];
 
 // 每种饰品类型的预设尺寸配置 (mm)
@@ -552,24 +552,46 @@ var app = {
       return;
     }
 
-    // 串绳线
+    // 串绳线 - 根据饰品类型绘制不同形态
     var tpl = TEMPLATES.find(function(t){return t.id===app.currentTemplateId;});
     var ropeType = tpl ? (tpl.ropeType || 'circle') : 'circle';
+    var isMulti = (app.currentTemplateId==='bracelet_double'||app.currentTemplateId==='bracelet_triple');
+    var rings = app.currentTemplateId==='bracelet_triple' ? 3 : (app.currentTemplateId==='bracelet_double' ? 2 : 1);
+
     ctx.strokeStyle = '#8b7355';
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
-    ctx.beginPath();
+
+    var cx=w/2, cy=h/2, r=Math.min(w,h)*0.38;
 
     if(ropeType==='circle'){
-      var cx=w/2, cy=h/2, r=Math.min(w,h)*0.35;
-      ctx.arc(cx, cy, r, 0, Math.PI*2);
+      // 手串：单圈/双圈/三圈同心圆
+      for(var ring=0; ring<rings; ring++){
+        var rr = r - ring*12;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rr, 0, Math.PI*2);
+        ctx.stroke();
+      }
     } else if(ropeType==='uShape'){
-      ctx.moveTo(w/2-100, h*0.15);
-      ctx.quadraticCurveTo(w/2-50, h*0.6, w/2, h*0.6);
-      ctx.quadraticCurveTo(w/2+50, h*0.6, w/2+100, h*0.15);
+      // 项链：U形曲线
+      ctx.beginPath();
+      var uw = Math.min(w*0.6, 280);
+      ctx.moveTo(cx-uw/2, h*0.12);
+      ctx.bezierCurveTo(cx-uw/2, h*0.55, cx, h*0.65, cx, h*0.65);
+      ctx.bezierCurveTo(cx, h*0.65, cx+uw/2, h*0.55, cx+uw/2, h*0.12);
+      ctx.stroke();
     } else {
-      ctx.moveTo(w/2, h*0.08);
-      ctx.lineTo(w/2, h*0.92);
+      // 耳环/手机链：垂直线
+      ctx.beginPath();
+      ctx.moveTo(cx, h*0.08);
+      ctx.lineTo(cx, h*0.92);
+      ctx.stroke();
+      // 顶部挂钩（手机链）
+      if(app.currentTemplateId==='phone_chain'){
+        ctx.beginPath();
+        ctx.arc(cx, h*0.06, 8, Math.PI, 0);
+        ctx.stroke();
+      }
     }
     ctx.stroke();
 
@@ -577,22 +599,31 @@ var app = {
     var positions = [];
     var N = beads.length;
     if(ropeType==='circle'){
-      var r2 = Math.min(w,h)*0.35;
+      // 手串：珠子沿环形排列。多圈时平分到各圈
       for(var i=0;i<N;i++){
-        var angle = N>1 ? (i/N)*Math.PI*2 - Math.PI/2 : -Math.PI/2;
-        positions.push({x:w/2+Math.cos(angle)*r2, y:h/2+Math.sin(angle)*r2});
+        var ringIdx = isMulti ? Math.floor(i / Math.ceil(N/rings)) : 0;
+        var ringR = r - ringIdx*12;
+        var localN = isMulti ? Math.ceil(N/rings) : N;
+        var localI = isMulti ? (i % Math.ceil(N/rings)) : i;
+        var angle = localN>1 ? (localI/(localN-1))*Math.PI*2 - Math.PI/2 : -Math.PI/2;
+        // 第二圈从对侧开始，避免珠子重叠
+        if(ringIdx%2===1) angle += Math.PI;
+        positions.push({x:cx+Math.cos(angle)*ringR, y:cy+Math.sin(angle)*ringR});
       }
     } else if(ropeType==='uShape'){
+      var uw = Math.min(w*0.6, 280);
       for(var i=0;i<N;i++){
         var t2 = N>1 ? i/(N-1) : 0.5;
-        var x2 = w/2-100 + t2*200;
-        var y2 = h*0.6 - Math.sin(t2*Math.PI)*h*0.45;
+        // 沿U形曲线参数化
+        var x2 = cx-uw/2 + t2*uw;
+        var y2 = h*0.12 + Math.sin(t2*Math.PI)*h*0.53;
         positions.push({x:x2, y:y2});
       }
     } else {
+      // 直线：珠子沿垂直线均匀分布
       for(var i=0;i<N;i++){
         var t3 = N>1 ? i/(N-1) : 0.5;
-        positions.push({x:w/2, y:h*0.08 + t3*h*0.84});
+        positions.push({x:cx, y:h*0.08 + t3*h*0.84});
       }
     }
 
