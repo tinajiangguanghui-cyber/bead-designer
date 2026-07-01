@@ -571,9 +571,9 @@ class BeadRenderer {
     this.ropeGroup = new THREE.Group();
     this.webglAvailable = true;
 
-    // 相机
+    // 相机 - 斜前方俯视，能看到立体感
     this.camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-    this.camera.position.set(0, 8, 0); // 正上方俯视
+    this.camera.position.set(0, 4, 7);
     this.camera.lookAt(0, 0, 0);
 
     // 渲染器 - 尝试创建WebGL上下文
@@ -613,7 +613,7 @@ class BeadRenderer {
       this.isDragging = false;
       this.previousMouse = { x: 0, y: 0 };
       this.spherical = new THREE.Spherical();
-      this.targetSpherical = new THREE.Spherical(8, Math.PI / 6, 0); // 斜上方俯视
+      this.targetSpherical = new THREE.Spherical(7, Math.PI / 4, 0); // 斜前方
       this.autoRotate = true;
       this.autoRotateSpeed = 0.3;
       this.setupEvents();
@@ -626,12 +626,12 @@ class BeadRenderer {
   }
 
   setupLights() {
-    // 环境光
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    // 环境光 - 增强
+    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
     this.scene.add(ambient);
 
     // 主光（带阴影）
-    this.mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    this.mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
     this.mainLight.position.set(5, 8, 5);
     this.mainLight.castShadow = true;
     this.mainLight.shadow.mapSize.width = 1024;
@@ -919,7 +919,7 @@ class BeadRenderer {
   }
 
   resetView() {
-    this.targetSpherical.set(8, Math.PI / 6, 0);
+    this.targetSpherical.set(7, Math.PI / 4, 0);
     this.autoRotate = true;
   }
 }
@@ -1341,26 +1341,40 @@ class App {
     const container = document.getElementById('hero-canvas');
     const previewRenderer = new BeadRenderer(container);
     if (!previewRenderer.webglAvailable || !previewRenderer.renderer) {
-      // WebGL不可用时，显示静态占位
       container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
       return;
     }
-    previewRenderer.setBackground('transparent');
-    // 生成示例手串
+    previewRenderer.setBackground('white');
+
+    // 精选示例珠子：粉晶圆珠 + 金隔片交替，对比鲜明
+    const pinkCrystal = BEAD_LIBRARY.find(b => b.material === 'crystal' && b.color === 'pink' && b.shape === 'round');
+    const goldSpacer = BEAD_LIBRARY.find(b => b.material === 'metal' && b.color === 'gold' && b.shape === 'spacer');
+    const greenJade = BEAD_LIBRARY.find(b => b.material === 'jade' && b.color === 'green' && b.shape === 'round');
+    const silverBead = BEAD_LIBRARY.find(b => b.material === 'metal' && b.color === 'silver' && b.shape === 'round');
+
+    // 用10颗珠子做示例，颜色对比明显
+    const demoBeads = [
+      pinkCrystal, goldSpacer, greenJade, goldSpacer,
+      pinkCrystal, silverBead, greenJade, goldSpacer,
+      pinkCrystal, goldSpacer
+    ].filter(Boolean);
+
+    // 生成环形路径
     const points = [];
+    const R = 2.5;
     for (let i = 0; i <= 128; i++) {
       const angle = (i / 128) * Math.PI * 2;
-      points.push(new THREE.Vector3(Math.cos(angle) * 2.5, 0, Math.sin(angle) * 2.5));
+      points.push(new THREE.Vector3(Math.cos(angle) * R, 0, Math.sin(angle) * R));
     }
-    const result = previewRenderer.createRope(points, 0.1, 0x6b5b4a);
+    const result = previewRenderer.createRope(points, 0.1, 0x8b7355);
     previewRenderer.ropeGroup.add(result.mesh);
     const curve = result.curve;
 
-    const sampleBeads = BEAD_LIBRARY.slice(0, 20);
-    for (let i = 0; i < 20; i++) {
-      const t = i / 20;
+    // 放置珠子
+    for (let i = 0; i < demoBeads.length; i++) {
+      const t = i / demoBeads.length;
       const point = curve.getPointAt(t);
-      const bead = sampleBeads[i % sampleBeads.length];
+      const bead = demoBeads[i];
       const mesh = previewRenderer.createBeadMesh(bead, bead.defaultSize);
       mesh.position.copy(point);
       previewRenderer.beadsGroup.add(mesh);
