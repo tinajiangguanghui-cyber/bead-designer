@@ -5,144 +5,70 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>串珠妙计 - 在线手串设计</title>
 <style>
-/* === Reset & Base === */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body {
-  width: 100%; height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 14px;
-  color: #333;
-  background: #f8f6f2;
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
+html, body { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 14px; color: #333; background: #f8f6f2; overflow: hidden; user-select: none; }
 button { border: none; cursor: pointer; font-family: inherit; font-size: inherit; }
 input { font-family: inherit; font-size: inherit; outline: none; }
 
-/* === Pages === */
 .page { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; overflow: hidden; }
 .page.active { display: flex; }
 
-/* === Home === */
+/* Home */
 #page-home { background: linear-gradient(180deg, #fdf6f0 0%, #f0e6da 100%); align-items: center; justify-content: center; }
 .home-header { position: absolute; top: 60px; }
 .logo { font-size: 28px; font-weight: 700; color: #8b5e3c; letter-spacing: 2px; }
-.home-hero { width: 280px; height: 280px; margin-bottom: 40px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 32px rgba(139,94,60,0.2); }
+.home-hero { width: 220px; height: 220px; margin-bottom: 30px; border-radius: 50%; background: radial-gradient(circle, #fff 30%, #f0e6da 100%); box-shadow: 0 8px 32px rgba(139,94,60,0.2); display: flex; align-items: center; justify-content: center; font-size: 72px; animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 .home-actions { display: flex; flex-direction: column; gap: 12px; width: 240px; }
 
-/* === Buttons === */
-.btn-primary {
-  background: linear-gradient(135deg, #c9956b, #8b5e3c);
-  color: #fff; padding: 14px 32px; border-radius: 28px; font-size: 16px; font-weight: 600;
-  box-shadow: 0 4px 16px rgba(139,94,60,0.3); transition: transform 0.15s, box-shadow 0.15s;
-}
-.btn-primary:active { transform: scale(0.96); box-shadow: 0 2px 8px rgba(139,94,60,0.2); }
-.btn-primary:disabled { opacity: 0.5; pointer-events: none; }
-.btn-secondary {
-  background: rgba(255,255,255,0.8); color: #8b5e3c; padding: 12px 28px; border-radius: 28px;
-  font-size: 14px; border: 1.5px solid #d4b896;
-}
-.btn-secondary:active { background: rgba(255,255,255,0.95); }
+.btn-primary { background: linear-gradient(135deg, #c9956b, #8b5e3c); color: #fff; padding: 14px 32px; border-radius: 28px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 16px rgba(139,94,60,0.3); transition: transform 0.15s; }
+.btn-primary:active { transform: scale(0.96); }
+.btn-secondary { background: rgba(255,255,255,0.8); color: #8b5e3c; padding: 12px 28px; border-radius: 28px; font-size: 14px; border: 1.5px solid #d4b896; }
 .btn-large { padding: 16px 40px; font-size: 18px; }
 .btn-block { width: 100%; }
 .btn-danger { background: #e74c3c; color: #fff; padding: 12px 24px; border-radius: 8px; width: 100%; margin-top: 12px; }
-.btn-icon {
-  width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.85);
-  display: flex; align-items: center; justify-content: center; font-size: 18px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-.btn-icon:active { background: rgba(255,255,255,1); }
-.btn-icon:disabled { opacity: 0.35; pointer-events: none; }
-.btn-export { background: #f0c78e; }
+.btn-icon { width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.btn-icon:disabled { opacity: 0.35; }
 .btn-close { background: none; font-size: 24px; color: #999; padding: 4px 8px; }
 
-/* === Designer Page === */
-#page-designer { background: #1a1a2e; }
-.designer-toolbar {
-  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-  background: rgba(26,26,46,0.95); border-bottom: 1px solid rgba(255,255,255,0.1);
-  z-index: 10; flex-shrink: 0;
-}
-.current-template { flex: 1; color: #ccc; font-size: 13px; text-align: center; }
-.designer-canvas { flex: 1; position: relative; min-height: 0; }
-.designer-canvas canvas { display: block; }
-.designer-info {
-  display: flex; justify-content: space-between; padding: 6px 16px;
-  background: rgba(26,26,46,0.9); color: #aaa; font-size: 12px;
-  border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
-}
-.designer-info strong { color: #f0c78e; }
-
-/* === Bead Panel === */
-.bead-panel {
-  height: 160px; background: rgba(26,26,46,0.95);
-  border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0;
-  display: flex; flex-direction: column;
-}
-.bead-filters {
-  display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; flex-shrink: 0;
-}
-.bead-filters::-webkit-scrollbar { display: none; }
-.filter-btn {
-  padding: 5px 14px; border-radius: 16px; font-size: 12px;
-  background: rgba(255,255,255,0.1); color: #aaa; white-space: nowrap;
-  transition: all 0.2s;
-}
-.filter-btn.active { background: #c9956b; color: #fff; }
-.bead-list {
-  flex: 1; display: flex; gap: 10px; padding: 8px 12px; overflow-x: auto; align-items: center;
-}
-.bead-list::-webkit-scrollbar { display: none; }
-.bead-item {
-  flex-shrink: 0; width: 64px; height: 80px; border-radius: 12px;
-  background: rgba(255,255,255,0.06); display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 4px; cursor: pointer;
-  transition: all 0.2s; border: 2px solid transparent;
-}
-.bead-item:active { transform: scale(0.92); }
-.bead-item.selected { border-color: #f0c78e; background: rgba(240,199,142,0.12); }
-.bead-item .bead-thumb {
-  width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-.bead-item .bead-label { font-size: 10px; color: #999; text-align: center; line-height: 1.2; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-/* === Modals === */
-.modal {
-  display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100;
-  align-items: center; justify-content: center;
-}
+/* Modal */
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100; align-items: center; justify-content: center; }
 .modal.show { display: flex; }
 .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-.modal-content {
-  position: relative; background: #fff; border-radius: 16px; padding: 20px;
-  width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.2);
-}
-.modal-content.bottom-sheet {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  border-radius: 16px 16px 0 0; width: 100%; max-width: 100%;
-}
+.modal-content { position: relative; background: #fff; border-radius: 16px; padding: 20px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.modal-header h3 { font-size: 17px; color: #333; }
+.modal-header h3 { font-size: 17px; }
 
-/* === Template Grid === */
+/* Template Grid */
 .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-.template-item {
-  padding: 16px; border-radius: 12px; background: #faf6f0; text-align: center;
-  cursor: pointer; transition: all 0.2s; border: 2px solid transparent;
-}
+.template-item { padding: 16px; border-radius: 12px; background: #faf6f0; text-align: center; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
 .template-item:active { transform: scale(0.95); background: #f0e6da; }
 .template-item .template-icon { font-size: 36px; margin-bottom: 8px; }
 .template-item .template-name { font-size: 14px; font-weight: 600; color: #5a3e28; }
 .template-item .template-desc { font-size: 11px; color: #999; margin-top: 4px; }
 
-/* === Export === */
+/* Designer */
+#page-designer { background: #1a1a2e; }
+.designer-toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(26,26,46,0.95); border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 10; flex-shrink: 0; }
+.current-template { flex: 1; color: #ccc; font-size: 13px; text-align: center; }
+.designer-canvas { flex: 1; background: #252540; display: flex; align-items: center; justify-content: center; color: #666; font-size: 48px; }
+.designer-info { display: flex; justify-content: space-between; padding: 6px 16px; background: rgba(26,26,46,0.9); color: #aaa; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.designer-info strong { color: #f0c78e; }
+
+/* Bead Panel */
+.bead-panel { height: 160px; background: rgba(26,26,46,0.95); border-top: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; display: flex; flex-direction: column; }
+.bead-filters { display: flex; gap: 6px; padding: 8px 12px; overflow-x: auto; flex-shrink: 0; }
+.filter-btn { padding: 5px 14px; border-radius: 16px; font-size: 12px; background: rgba(255,255,255,0.1); color: #aaa; white-space: nowrap; }
+.filter-btn.active { background: #c9956b; color: #fff; }
+.bead-list { flex: 1; display: flex; gap: 10px; padding: 8px 12px; overflow-x: auto; align-items: center; }
+.bead-item { flex-shrink: 0; width: 64px; height: 80px; border-radius: 12px; background: rgba(255,255,255,0.06); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.bead-item:active { transform: scale(0.92); }
+.bead-item .bead-thumb { width: 36px; height: 36px; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+.bead-item .bead-label { font-size: 10px; color: #999; text-align: center; line-height: 1.2; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Export */
 .export-options { display: flex; gap: 12px; margin-bottom: 16px; }
-.export-option {
-  flex: 1; text-align: center; cursor: pointer; padding: 12px; border-radius: 12px;
-  border: 2px solid #eee; transition: all 0.2s;
-}
+.export-option { flex: 1; text-align: center; cursor: pointer; padding: 12px; border-radius: 12px; border: 2px solid #eee; }
 .export-option.active { border-color: #c9956b; background: #fdf6f0; }
 .export-preview { width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 8px; }
 .export-preview-transparent { background: repeating-conic-gradient(#eee 0% 25%, transparent 0% 50%) 50% / 12px 12px; }
@@ -150,47 +76,27 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 .export-preview-gradient { background: linear-gradient(135deg, #fdf6f0, #e8d5c4); }
 .export-option span { font-size: 12px; color: #666; }
 
-/* === Save === */
+/* Save */
 .save-form { display: flex; flex-direction: column; gap: 12px; }
-.save-form input {
-  padding: 12px 16px; border-radius: 10px; border: 1.5px solid #ddd;
-  font-size: 15px; width: 100%;
-}
+.save-form input { padding: 12px 16px; border-radius: 10px; border: 1.5px solid #ddd; font-size: 15px; width: 100%; }
 .save-form input:focus { border-color: #c9956b; }
 
-/* === Edit Form === */
+/* Edit */
 .edit-form { display: flex; flex-direction: column; gap: 14px; }
-.edit-row { }
 .edit-row label { display: block; font-size: 13px; color: #666; margin-bottom: 8px; font-weight: 500; }
 .size-options, .color-options { display: flex; gap: 8px; flex-wrap: wrap; }
-.size-opt, .color-opt {
-  padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer;
-  border: 1.5px solid #ddd; background: #fff; transition: all 0.15s;
-}
+.size-opt, .color-opt { padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; border: 1.5px solid #ddd; background: #fff; }
 .size-opt.active, .color-opt.active { border-color: #c9956b; background: #fdf6f0; color: #8b5e3c; font-weight: 600; }
-.color-opt { display: flex; align-items: center; gap: 6px; }
 .color-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,0.1); }
 
-/* === Works Page === */
+/* Works */
 #page-works { background: #f8f6f2; }
 .page-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #eee; }
-.page-header h3 { font-size: 17px; }
-.works-grid {
-  flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-  padding: 16px; overflow-y: auto; align-content: start;
-}
-.work-card {
-  background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: transform 0.15s;
-}
-.work-card:active { transform: scale(0.96); }
-.work-card .work-thumb {
-  width: 100%; aspect-ratio: 1; background: #f5f0ea;
-  display: flex; align-items: center; justify-content: center;
-}
-.work-card .work-thumb img { width: 80%; height: 80%; object-fit: contain; }
+.works-grid { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; overflow-y: auto; align-content: start; }
+.work-card { background: #fff; border-radius: 12px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.work-card .work-thumb { width: 100%; aspect-ratio: 1; background: #f5f0ea; display: flex; align-items: center; justify-content: center; font-size: 48px; }
 .work-card .work-info { padding: 10px 12px; }
-.work-card .work-name { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.work-card .work-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .work-card .work-meta { font-size: 11px; color: #999; display: flex; justify-content: space-between; }
 .work-card .work-actions { display: flex; gap: 4px; padding: 0 12px 10px; }
 .work-card .work-actions button { font-size: 11px; padding: 4px 10px; border-radius: 12px; background: #f5f5f5; color: #666; }
@@ -199,48 +105,15 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 .works-empty .empty-icon { font-size: 48px; margin-bottom: 12px; }
 .works-empty p { color: #999; margin-bottom: 16px; }
 
-/* === Exporting === */
-.exporting-modal { text-align: center; padding: 40px; }
-.exporting-spinner {
-  width: 48px; height: 48px; border: 4px solid #eee; border-top-color: #c9956b;
-  border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* === Toast === */
-.toast {
-  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
-  background: rgba(0,0,0,0.8); color: #fff; padding: 10px 24px; border-radius: 20px;
-  font-size: 13px; z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none;
-}
+.toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); color: #fff; padding: 10px 24px; border-radius: 20px; font-size: 13px; z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* === Responsive === */
-@media (min-width: 768px) {
-  .template-grid { grid-template-columns: repeat(3, 1fr); }
-  .works-grid { grid-template-columns: repeat(3, 1fr); }
-  .modal-content { max-width: 480px; }
-  .modal-content.bottom-sheet { max-width: 480px; border-radius: 16px; bottom: 20px; }
-}
-@media (min-width: 1024px) {
-  #page-designer { flex-direction: row; }
-  .designer-toolbar { flex-direction: column; width: 56px; padding: 12px 8px; border-right: 1px solid rgba(255,255,255,0.1); border-bottom: none; }
-  .current-template { writing-mode: vertical-rl; font-size: 12px; }
-  .bead-panel { width: 240px; height: 100%; border-left: 1px solid rgba(255,255,255,0.1); border-top: none; }
-  .bead-list { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
-  .bead-item { width: 80px; height: 64px; flex-direction: row; }
-  .works-grid { grid-template-columns: repeat(4, 1fr); }
-}
-
 </style>
 </head>
 <body>
 
 <div id="page-home" class="page active">
-  <div class="home-header">
-    <div class="logo">📿 串珠妙计</div>
-  </div>
-  <div class="home-hero" id="hero-canvas"></div>
+  <div class="home-header"><div class="logo">📿 串珠妙计</div></div>
+  <div class="home-hero">📿</div>
   <div class="home-actions">
     <button class="btn-primary btn-large" id="btn-start-design">开始设计</button>
     <button class="btn-secondary" id="btn-my-works">我的作品 <span id="works-count">0</span></button>
@@ -250,29 +123,32 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 <div id="modal-template" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
-    <div class="modal-header">
-      <h3>选择饰品类型</h3>
-      <button class="btn-close" id="btn-close-template">&times;</button>
-    </div>
+    <div class="modal-header"><h3>选择饰品类型</h3><button class="btn-close" id="btn-close-template">&times;</button></div>
     <div class="template-grid" id="template-grid"></div>
   </div>
 </div>
 
 <div id="page-designer" class="page">
   <div class="designer-toolbar">
-    <button class="btn-icon" id="btn-back" title="返回">←</button>
+    <button class="btn-icon" id="btn-back">←</button>
     <span class="current-template" id="current-template-name">手串·单圈</span>
-    <button class="btn-icon" id="btn-undo" title="撤销" disabled>↩</button>
-    <button class="btn-icon" id="btn-redo" title="重做" disabled>↪</button>
-    <button class="btn-icon" id="btn-save" title="保存">💾</button>
-    <button class="btn-icon btn-export" id="btn-export" title="导出">📷</button>
+    <button class="btn-icon" id="btn-undo" disabled>↩</button>
+    <button class="btn-icon" id="btn-redo" disabled>↪</button>
+    <button class="btn-icon" id="btn-save">💾</button>
+    <button class="btn-icon" id="btn-export">📷</button>
   </div>
-  <div class="designer-canvas" id="designer-canvas"></div>
-  <div class="designer-info" id="designer-info">
+  <div class="designer-canvas" id="designer-canvas">
+    <div style="text-align:center;color:#555;">
+      <div style="font-size:64px;">📿</div>
+      <div style="font-size:14px;margin-top:12px;">设计画布区域</div>
+      <div style="font-size:12px;color:#777;">3D渲染将在后续版本启用</div>
+    </div>
+  </div>
+  <div class="designer-info">
     <span>共 <strong id="bead-count">0</strong> 颗珠子</span>
     <span>总长约 <strong id="total-length">0</strong>mm</span>
   </div>
-  <div class="bead-panel" id="bead-panel">
+  <div class="bead-panel">
     <div class="bead-filters" id="bead-filters"></div>
     <div class="bead-list" id="bead-list"></div>
   </div>
@@ -280,20 +156,11 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 
 <div id="modal-bead-edit" class="modal">
   <div class="modal-overlay"></div>
-  <div class="modal-content bottom-sheet">
-    <div class="modal-header">
-      <h3 id="edit-bead-name">珠子编辑</h3>
-      <button class="btn-close" id="btn-close-edit">&times;</button>
-    </div>
+  <div class="modal-content" style="border-radius:16px 16px 0 0; position:fixed; bottom:0; left:0; right:0; max-width:100%;">
+    <div class="modal-header"><h3 id="edit-bead-name">珠子编辑</h3><button class="btn-close" id="btn-close-edit">&times;</button></div>
     <div class="edit-form">
-      <div class="edit-row">
-        <label>尺寸</label>
-        <div class="size-options" id="edit-sizes"></div>
-      </div>
-      <div class="edit-row">
-        <label>颜色</label>
-        <div class="color-options" id="edit-colors"></div>
-      </div>
+      <div class="edit-row"><label>尺寸</label><div class="size-options" id="edit-sizes"></div></div>
+      <div class="edit-row"><label>颜色</label><div class="color-options" id="edit-colors"></div></div>
       <button class="btn-danger" id="btn-delete-bead">删除这颗珠子</button>
     </div>
   </div>
@@ -302,1599 +169,368 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 <div id="modal-export" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
-    <div class="modal-header">
-      <h3>导出效果图</h3>
-      <button class="btn-close" id="btn-close-export">&times;</button>
-    </div>
+    <div class="modal-header"><h3>导出效果图</h3><button class="btn-close" id="btn-close-export">&times;</button></div>
     <div class="export-options">
-      <div class="export-option" data-bg="transparent">
-        <div class="export-preview export-preview-transparent"></div>
-        <span>透明背景 PNG</span>
-      </div>
-      <div class="export-option" data-bg="white">
-        <div class="export-preview export-preview-white"></div>
-        <span>白色背景 JPG</span>
-      </div>
-      <div class="export-option" data-bg="gradient">
-        <div class="export-preview export-preview-gradient"></div>
-        <span>渐变背景 JPG</span>
-      </div>
+      <div class="export-option active" data-bg="transparent"><div class="export-preview export-preview-transparent"></div><span>透明背景 PNG</span></div>
+      <div class="export-option" data-bg="white"><div class="export-preview export-preview-white"></div><span>白色背景 JPG</span></div>
+      <div class="export-option" data-bg="gradient"><div class="export-preview export-preview-gradient"></div><span>渐变背景 JPG</span></div>
     </div>
     <button class="btn-primary btn-block" id="btn-confirm-export">确认导出</button>
   </div>
 </div>
 
 <div id="page-works" class="page">
-  <div class="page-header">
-    <button class="btn-icon" id="btn-works-back">←</button>
-    <h3>我的作品</h3>
-  </div>
+  <div class="page-header"><button class="btn-icon" id="btn-works-back">←</button><h3>我的作品</h3></div>
   <div class="works-grid" id="works-grid">
-    <div class="works-empty">
-      <div class="empty-icon">📿</div>
-      <p>还没有作品</p>
-      <button class="btn-primary" id="btn-works-create">去设计第一个吧</button>
-    </div>
+    <div class="works-empty"><div class="empty-icon">📿</div><p>还没有作品</p><button class="btn-primary" id="btn-works-create">去设计第一个吧</button></div>
   </div>
 </div>
 
 <div id="modal-save" class="modal">
   <div class="modal-overlay"></div>
   <div class="modal-content">
-    <div class="modal-header">
-      <h3>保存作品</h3>
-      <button class="btn-close" id="btn-close-save">&times;</button>
-    </div>
-    <div class="save-form">
-      <input type="text" id="input-work-name" placeholder="输入作品名称" maxlength="30">
-      <button class="btn-primary btn-block" id="btn-confirm-save">保存</button>
-    </div>
-  </div>
-</div>
-
-<div id="modal-exporting" class="modal">
-  <div class="modal-overlay"></div>
-  <div class="modal-content exporting-modal">
-    <div class="exporting-spinner"></div>
-    <p>正在渲染图片...</p>
+    <div class="modal-header"><h3>保存作品</h3><button class="btn-close" id="btn-close-save">&times;</button></div>
+    <div class="save-form"><input type="text" id="input-work-name" placeholder="输入作品名称" maxlength="30"><button class="btn-primary btn-block" id="btn-confirm-save">保存</button></div>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js">
-</script>
-
 <script>
-// 显示加载状态
-document.getElementById('hero-canvas').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
-
-// === beadData.js ===
-// 珠子数据配置 - 5种材质 × 多种形状颜色
-const BEAD_MATERIALS = {
-  crystal: { name: '水晶', roughness: 0.15, metalness: 0.05, opacity: 0.85, transmission: 0.4, ior: 1.5 },
-  jade:     { name: '玉石', roughness: 0.3, metalness: 0.0, opacity: 1.0, transmission: 0.05, ior: 1.3 },
-  wood:     { name: '木质', roughness: 0.7, metalness: 0.0, opacity: 1.0, transmission: 0.0, ior: 1.0 },
-  metal:    { name: '金属', roughness: 0.25, metalness: 0.9, opacity: 1.0, transmission: 0.0, ior: 2.0 },
-  ceramic:  { name: '陶瓷', roughness: 0.5, metalness: 0.0, opacity: 1.0, transmission: 0.0, ior: 1.2 }
-};
-
-const BEAD_COLORS = {
-  red:      { name: '红', hex: '#c0392b' },
-  orange:   { name: '橙', hex: '#e67e22' },
-  yellow:   { name: '黄', hex: '#f1c40f' },
-  green:    { name: '绿', hex: '#27ae60' },
-  blue:     { name: '蓝', hex: '#2980b9' },
-  purple:   { name: '紫', hex: '#8e44ad' },
-  white:    { name: '白', hex: '#ecf0f1' },
-  black:    { name: '黑', hex: '#2c3e50' },
-  pink:     { name: '粉', hex: '#e8a0bf' },
-  brown:    { name: '棕', hex: '#8b5e3c' },
-  teal:     { name: '青', hex: '#1abc9c' },
-  gold:     { name: '金', hex: '#f0c040' },
-  silver:   { name: '银', hex: '#c0c0c0' },
-  rosegold: { name: '玫瑰金', hex: '#e8b4b8' }
-};
-
-// 珠子数据库 - MVP 60种
-const BEAD_LIBRARY = buildBeadLibrary();
-
-function buildBeadLibrary() {
-  const beads = [];
-  let id = 0;
-
-  // 水晶圆珠 - 6种颜色
-  ['pink','purple','white','yellow','brown','blue'].forEach(c => {
-    beads.push({ id: id++, name: `${BEAD_COLORS[c].name}晶圆珠`, material: 'crystal', shape: 'round', color: c, sizes: [6,8,10,12], defaultSize: 8 });
-  });
-
-  // 水晶桶珠
-  ['pink','purple'].forEach(c => {
-    beads.push({ id: id++, name: `${BEAD_COLORS[c].name}晶桶珠`, material: 'crystal', shape: 'barrel', color: c, sizes: [8,10,12], defaultSize: 10 });
-  });
-
-  // 水晶算盘珠
-  ['white','pink'].forEach(c => {
-    beads.push({ id: id++, name: `${BEAD_COLORS[c].name}晶算盘珠`, material: 'crystal', shape: 'abacus', color: c, sizes: [8,10], defaultSize: 8 });
-  });
-
-  // 玉石圆珠 - 4种
-  [{c:'green',n:'翡翠绿'},{c:'white',n:'和田白'},{c:'red',n:'玛瑙红'},{c:'blue',n:'青金石'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}圆珠`, material: 'jade', shape: 'round', color: x.c, sizes: [6,8,10,12], defaultSize: 8 });
-  });
-
-  // 玉石桶珠
-  [{c:'green',n:'翡翠绿'},{c:'red',n:'玛瑙红'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}桶珠`, material: 'jade', shape: 'barrel', color: x.c, sizes: [8,10,12], defaultSize: 10 });
-  });
-
-  // 玉石算盘珠
-  beads.push({ id: id++, name: '翡翠绿算盘珠', material: 'jade', shape: 'abacus', color: 'green', sizes: [8,10], defaultSize: 8 });
-
-  // 玉石雕刻件
-  [{c:'green',n:'貔貅'},{c:'white',n:'平安扣'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}雕刻`, material: 'jade', shape: 'carving', color: x.c, sizes: [10,12,14], defaultSize: 12 });
-  });
-
-  // 木质圆珠
-  ['brown','black','brown'].forEach((c,i) => {
-    const names = ['檀木','菩提','崖柏'];
-    beads.push({ id: id++, name: `${names[i]}圆珠`, material: 'wood', shape: 'round', color: c, sizes: [8,10,12], defaultSize: 10 });
-  });
-
-  // 木质桶珠
-  beads.push({ id: id++, name: '檀木桶珠', material: 'wood', shape: 'barrel', color: 'brown', sizes: [10,12], defaultSize: 10 });
-
-  // 木质雕刻件
-  beads.push({ id: id++, name: '莲花雕刻', material: 'wood', shape: 'carving', color: 'brown', sizes: [10,12,14], defaultSize: 12 });
-
-  // 金属圆珠
-  [{c:'silver',n:'银'},{c:'gold',n:'金'},{c:'rosegold',n:'玫瑰金'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}圆珠`, material: 'metal', shape: 'round', color: x.c, sizes: [4,6,8,10], defaultSize: 6 });
-  });
-
-  // 金属隔片
-  [{c:'silver',n:'银'},{c:'gold',n:'金'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}隔片`, material: 'metal', shape: 'spacer', color: x.c, sizes: [4,6], defaultSize: 4 });
-  });
-
-  // 金属雕刻件
-  [{c:'silver',n:'银'},{c:'gold',n:'金'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}心形`, material: 'metal', shape: 'carving', color: x.c, sizes: [8,10], defaultSize: 8 });
-  });
-
-  // 陶瓷圆珠
-  [{c:'white',n:'白瓷'},{c:'blue',n:'青花'},{c:'teal',n:'彩釉'}].forEach(x => {
-    beads.push({ id: id++, name: `${x.n}圆珠`, material: 'ceramic', shape: 'round', color: x.c, sizes: [8,10,12], defaultSize: 10 });
-  });
-
-  // 陶瓷桶珠
-  beads.push({ id: id++, name: '青花桶珠', material: 'ceramic', shape: 'barrel', color: 'blue', sizes: [10,12], defaultSize: 10 });
-
-  // 陶瓷算盘珠
-  beads.push({ id: id++, name: '青花算盘珠', material: 'ceramic', shape: 'abacus', color: 'blue', sizes: [8,10], defaultSize: 8 });
-
-  return beads;
-}
-
-// 饰品类型模板
+// ========== 数据定义 ==========
 const TEMPLATES = [
-  { id: 'bracelet_single', name: '手串·单圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 1, defaultLength: 160, desc: '单圈手串' },
-  { id: 'bracelet_double', name: '手串·双圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 2, defaultLength: 320, desc: '双圈手串' },
-  { id: 'bracelet_triple', name: '手串·三圈', icon: '💫', category: '手串', ropeType: 'circle', ropeCount: 3, defaultLength: 480, desc: '三圈手串' },
-  { id: 'necklace_short', name: '项链·短链', icon: '✨', category: '项链', ropeType: 'uShape', ropeCount: 1, defaultLength: 400, desc: '短款项链' },
-  { id: 'necklace_long', name: '项链·长链', icon: '✨', category: '项链', ropeType: 'uShape', ropeCount: 1, defaultLength: 600, desc: '长款项链' },
-  { id: 'earring', name: '耳环', icon: '💎', category: '耳环', ropeType: 'straight', ropeCount: 1, defaultLength: 50, desc: '垂坠耳环' },
-  { id: 'phone_chain', name: '手机链', icon: '📱', category: '手机链', ropeType: 'straight_hook', ropeCount: 1, defaultLength: 150, desc: '手机挂链' },
+  { id:'bracelet_single', name:'手串·单圈', icon:'💫', category:'手串', desc:'单圈手串' },
+  { id:'bracelet_double', name:'手串·双圈', icon:'💫', category:'手串', desc:'双圈手串' },
+  { id:'bracelet_triple', name:'手串·三圈', icon:'💫', category:'手串', desc:'三圈手串' },
+  { id:'necklace_short', name:'项链·短链', icon:'✨', category:'项链', desc:'短款项链' },
+  { id:'necklace_long', name:'项链·长链', icon:'✨', category:'项链', desc:'长款项链' },
+  { id:'earring', name:'耳环', icon:'💎', category:'耳环', desc:'垂坠耳环' },
+  { id:'phone_chain', name:'手机链', icon:'📱', category:'手机链', desc:'手机挂链' }
 ];
 
-
-// === workManager.js ===
-const STORAGE_KEY = 'bead_designer_works';
-
-class WorkManager {
-  constructor() {
-    this.works = this.loadWorks();
-  }
-
-  loadWorks() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  saveWorks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.works));
-  }
-
-  addWork(name, designData, thumbnail) {
-    const work = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      name: name || `设计_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '')}`,
-      designData,
-      thumbnail: thumbnail || '',
-      createdAt: new Date().toISOString(),
-      beadCount: designData.beads ? designData.beads.length : 0
-    };
-    this.works.unshift(work);
-    this.saveWorks();
-    return work;
-  }
-
-  updateWork(id, designData, thumbnail) {
-    const work = this.works.find(w => w.id === id);
-    if (!work) return null;
-    work.designData = designData;
-    work.thumbnail = thumbnail || work.thumbnail;
-    work.beadCount = designData.beads ? designData.beads.length : 0;
-    work.updatedAt = new Date().toISOString();
-    this.saveWorks();
-    return work;
-  }
-
-  deleteWork(id) {
-    this.works = this.works.filter(w => w.id !== id);
-    this.saveWorks();
-  }
-
-  renameWork(id, newName) {
-    const work = this.works.find(w => w.id === id);
-    if (!work) return;
-    work.name = newName;
-    this.saveWorks();
-  }
-
-  getWork(id) {
-    return this.works.find(w => w.id === id);
-  }
-
-  getAllWorks() {
-    return [...this.works];
-  }
-
-  getCount() {
-    return this.works.length;
-  }
-}
-
-
-// === renderer.js ===
-
-class BeadRenderer {
-  constructor(canvasContainer) {
-    this.container = canvasContainer;
-    this.scene = new THREE.Scene();
-    this.beadsGroup = new THREE.Group();
-    this.ropeGroup = new THREE.Group();
-    this.webglAvailable = true;
-
-    // 相机 - 斜前方俯视，能看到立体感
-    this.camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-    this.camera.position.set(0, 4, 7);
-    this.camera.lookAt(0, 0, 0);
-
-    // 渲染器 - 尝试创建WebGL上下文
-    try {
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.setClearColor(0x000000, 0);
-      this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    } catch (e) {
-      console.warn('WebGL not available, falling back to canvas 2D');
-      this.webglAvailable = false;
-      this.renderer = null;
-      // 显示降级提示
-      const fallback = document.createElement('div');
-      fallback.className = 'webgl-fallback';
-      fallback.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">📿<br>3D渲染需要WebGL支持<br>请使用支持WebGL的浏览器打开</div>';
-      this.container.appendChild(fallback);
-      return;
-    }
-
-    // 光照
-    this.setupLights();
-
-    // 场景结构
-    this.scene.add(this.ropeGroup);
-    this.scene.add(this.beadsGroup);
-
-    // 地面参考（可选展示台）
-    this.pedestal = null;
-
-    // 挂载
-    if (this.renderer) {
-      this.container.appendChild(this.renderer.domElement);
-      this.resize();
-      // 手势状态
-      this.isDragging = false;
-      this.previousMouse = { x: 0, y: 0 };
-      this.spherical = new THREE.Spherical();
-      this.targetSpherical = new THREE.Spherical(7, Math.PI / 4, 0); // 斜前方
-      this.autoRotate = true;
-      this.autoRotateSpeed = 0.3;
-      this.setupEvents();
-    }
-
-    // 动画循环
-    this.clock = new THREE.Clock();
-    this.animate = this.animate.bind(this);
-    requestAnimationFrame(this.animate);
-  }
-
-  setupLights() {
-    // 环境光 - 增强
-    const ambient = new THREE.AmbientLight(0xffffff, 1.2);
-    this.scene.add(ambient);
-
-    // 主光（带阴影）
-    this.mainLight = new THREE.DirectionalLight(0xffffff, 1.5);
-    this.mainLight.position.set(5, 8, 5);
-    this.mainLight.castShadow = true;
-    this.mainLight.shadow.mapSize.width = 1024;
-    this.mainLight.shadow.mapSize.height = 1024;
-    this.mainLight.shadow.camera.near = 0.5;
-    this.mainLight.shadow.camera.far = 50;
-    this.mainLight.shadow.bias = -0.0001;
-    this.scene.add(this.mainLight);
-
-    // 辅助光
-    const fill = new THREE.DirectionalLight(0xffffff, 0.4);
-    fill.position.set(-3, 2, -3);
-    this.scene.add(fill);
-
-    // 背光
-    const back = new THREE.DirectionalLight(0xffffff, 0.3);
-    back.position.set(0, 1, -5);
-    this.scene.add(back);
-  }
-
-  resize() {
-    if (!this.renderer) return;
-    const rect = this.container.getBoundingClientRect();
-    const w = rect.width || 400;
-    const h = rect.height || 500;
-    this.renderer.setSize(w, h, false);
-    this.camera.aspect = w / Math.max(h, 1);
-    this.camera.updateProjectionMatrix();
-  }
-
-  setupEvents() {
-    const canvas = this.renderer.domElement;
-
-    canvas.addEventListener('pointerdown', (e) => {
-      this.isDragging = true;
-      this.autoRotate = false;
-      this.previousMouse = { x: e.clientX, y: e.clientY };
-    });
-
-    window.addEventListener('pointermove', (e) => {
-      if (!this.isDragging) return;
-      const dx = e.clientX - this.previousMouse.x;
-      const dy = e.clientY - this.previousMouse.y;
-      this.targetSpherical.theta -= dx * 0.008;
-      this.targetSpherical.phi -= dy * 0.008;
-      this.targetSpherical.phi = Math.max(0.3, Math.min(Math.PI / 2, this.targetSpherical.phi));
-      this.previousMouse = { x: e.clientX, y: e.clientY };
-    });
-
-    window.addEventListener('pointerup', () => {
-      this.isDragging = false;
-      setTimeout(() => { if (!this.isDragging) this.autoRotate = true; }, 2000);
-    });
-
-    canvas.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      this.targetSpherical.radius += e.deltaY * 0.01;
-      this.targetSpherical.radius = Math.max(4, Math.min(25, this.targetSpherical.radius));
-      this.autoRotate = false;
-      setTimeout(() => { if (!this.isDragging) this.autoRotate = true; }, 2000);
-    }, { passive: false });
-
-    // 双击重置
-    canvas.addEventListener('dblclick', () => {
-      this.targetSpherical.set(12, Math.PI / 3, 0);
-      this.autoRotate = true;
-    });
-
-    window.addEventListener('resize', () => this.resize());
-  }
-
-  animate() {
-    requestAnimationFrame(this.animate);
-    if (!this.renderer) return;
-
-    if (this.autoRotate && !this.isDragging) {
-      this.targetSpherical.theta += this.autoRotateSpeed * 0.01;
-    }
-
-    // 平滑插值
-    this.spherical.radius += (this.targetSpherical.radius - this.spherical.radius) * 0.1;
-    this.spherical.theta += (this.targetSpherical.theta - this.spherical.theta) * 0.1;
-    this.spherical.phi += (this.targetSpherical.phi - this.spherical.phi) * 0.1;
-
-    const pos = new THREE.Vector3().setFromSpherical(this.spherical);
-    this.camera.position.copy(pos);
-    this.camera.lookAt(0, 0, 0);
-
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  // 清除所有珠子和串绳
-  clear() {
-    while (this.beadsGroup.children.length > 0) {
-      const child = this.beadsGroup.children[0];
-      this.disposeMesh(child);
-      this.beadsGroup.remove(child);
-    }
-    while (this.ropeGroup.children.length > 0) {
-      const child = this.ropeGroup.children[0];
-      if (child.geometry) child.geometry.dispose();
-      if (child.material) child.material.dispose();
-      this.ropeGroup.remove(child);
-    }
-  }
-
-  disposeMesh(obj) {
-    obj.traverse(child => {
-      if (child.geometry) child.geometry.dispose();
-      if (child.material) {
-        if (Array.isArray(child.material)) {
-          child.material.forEach(m => m.dispose());
-        } else {
-          child.material.dispose();
-        }
-      }
-    });
-  }
-
-  // 创建串绳
-  createRope(curvePoints, radius = 0.15, color = 0x8b7355) {
-    const curve = new THREE.CatmullRomCurve3(curvePoints);
-    const tubeGeom = new THREE.TubeGeometry(curve, 128, radius, 16, true);
-    const tubeMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.1 });
-    const tube = new THREE.Mesh(tubeGeom, tubeMat);
-    tube.castShadow = true;
-    tube.receiveShadow = true;
-    return { mesh: tube, curve };
-  }
-
-  // 创建珠子3D模型
-  createBeadMesh(beadData, size) {
-    const group = new THREE.Group();
-    const matParams = this.getMaterialParams(beadData.material, beadData.color, size);
-
-    let geometry;
-    const s = size / 2;
-
-    switch (beadData.shape) {
-      case 'round':
-        geometry = new THREE.SphereGeometry(s, 48, 48);
-        break;
-      case 'barrel':
-        geometry = new THREE.CylinderGeometry(s * 0.7, s * 0.7, s * 1.6, 32);
-        break;
-      case 'abacus':
-        // 算盘珠：扁圆形
-        geometry = new THREE.SphereGeometry(s, 40, 20);
-        geometry.scale(1, 0.5, 1);
-        break;
-      case 'carving':
-        // 雕刻件：八角柱
-        geometry = new THREE.CylinderGeometry(s * 0.8, s * 0.8, s * 1.5, 8);
-        break;
-      case 'spacer':
-        // 隔片：薄圆盘
-        geometry = new THREE.CylinderGeometry(s * 0.9, s * 0.9, s * 0.35, 32);
-        break;
-      default:
-        geometry = new THREE.SphereGeometry(s, 32, 32);
-    }
-
-    const material = new THREE.MeshStandardMaterial(matParams);
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-
-    // 打孔效果（小圆柱体切除模拟）
-    const holeGeom = new THREE.CylinderGeometry(s * 0.2, s * 0.2, s * 2.5, 16);
-    const holeMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-    const hole = new THREE.Mesh(holeGeom, holeMat);
-    hole.rotation.x = Math.PI / 2;
-    group.add(hole);
-
-    group.add(mesh);
-    group.userData = { beadData, size, mainMesh: mesh };
-
-    return group;
-  }
-
-  getMaterialParams(material, colorKey, size) {
-    const colorHex = this.getColorHex(colorKey);
-    const base = {
-      color: new THREE.Color(colorHex),
-      roughness: 0.3,
-      metalness: 0.0,
-    };
-
-    switch (material) {
-      case 'crystal':
-        return {
-          ...base,
-          roughness: 0.12,
-          metalness: 0.03,
-          transparent: true,
-          opacity: 0.82,
-          envMapIntensity: 0.6,
-        };
-      case 'jade':
-        return {
-          ...base,
-          roughness: 0.35,
-          metalness: 0.0,
-          envMapIntensity: 0.2,
-        };
-      case 'wood':
-        return {
-          ...base,
-          roughness: 0.75,
-          metalness: 0.0,
-          color: new THREE.Color(colorHex).multiplyScalar(0.9),
-        };
-      case 'metal':
-        return {
-          ...base,
-          roughness: 0.2,
-          metalness: 0.95,
-          envMapIntensity: 1.0,
-          color: new THREE.Color(colorHex),
-        };
-      case 'ceramic':
-        return {
-          ...base,
-          roughness: 0.45,
-          metalness: 0.02,
-          envMapIntensity: 0.3,
-        };
-      default:
-        return base;
-    }
-  }
-
-  getColorHex(colorKey) {
-    const map = {
-      red: '#c0392b', orange: '#e67e22', yellow: '#f1c40f', green: '#27ae60',
-      blue: '#2980b9', purple: '#8e44ad', white: '#ecf0f1', black: '#2c3e50',
-      pink: '#e8a0bf', brown: '#8b5e3c', teal: '#1abc9c',
-      gold: '#f0c040', silver: '#c0c0c0', rosegold: '#e8b4b8'
-    };
-    return map[colorKey] || '#cccccc';
-  }
-
-  // 设置背景
-  setBackground(type) {
-    switch (type) {
-      case 'transparent':
-        this.renderer.setClearColor(0x000000, 0);
-        this.scene.background = null;
-        break;
-      case 'white':
-        this.scene.background = new THREE.Color(0xffffff);
-        break;
-      case 'gradient':
-        this.scene.background = new THREE.Color(0xfdf6f0);
-        break;
-    }
-  }
-
-  // 设置展示台
-  setPedestal(visible) {
-    if (visible && !this.pedestal) {
-      const geom = new THREE.CylinderGeometry(2.5, 3, 0.3, 48);
-      const mat = new THREE.MeshStandardMaterial({ color: 0xe8d5c4, roughness: 0.5, metalness: 0.1 });
-      this.pedestal = new THREE.Mesh(geom, mat);
-      this.pedestal.position.y = -2;
-      this.pedestal.receiveShadow = true;
-      this.scene.add(this.pedestal);
-    } else if (!visible && this.pedestal) {
-      this.scene.remove(this.pedestal);
-      this.pedestal.geometry.dispose();
-      this.pedestal.material.dispose();
-      this.pedestal = null;
-    }
-  }
-
-  // 导出图片
-  exportImage(bgType, format) {
-    if (!this.renderer) return '';
-    this.autoRotate = false;
-    this.targetSpherical.theta = 0;
-    this.spherical.theta = 0;
-    this.renderer.render(this.scene, this.camera);
-    const dataURL = this.renderer.domElement.toDataURL(`image/${format === 'png' ? 'png' : 'jpeg'}`, 0.95);
-    return dataURL;
-  }
-
-  resetView() {
-    this.targetSpherical.set(7, Math.PI / 4, 0);
-    this.autoRotate = true;
-  }
-}
-
-
-// === designEngine.js ===
-
-
-class DesignEngine {
-  constructor(renderer) {
-    this.renderer = renderer;
-    this.template = TEMPLATES[0];
-    this.beads = []; // { beadDef, size, color }
-    this.undoStack = [];
-    this.redoStack = [];
-    this.maxUndo = 30;
-
-    this.ropeMesh = null;
-    this.beadMeshes = [];
-
-    // 当前选中的珠子索引
-    this.selectedBeadIndex = -1;
-  }
-
-  // === 模板管理 ===
-  setTemplate(templateId) {
-    const tpl = TEMPLATES.find(t => t.id === templateId);
-    if (!tpl) return;
-    this.template = tpl;
-    this.clearBeads();
-    this.renderer.clear();
-    this.rebuildRope();
-    this.renderer.resetView();
-    this.undoStack = [];
-    this.redoStack = [];
-  }
-
-  // === 串绳重建 ===
-  rebuildRope() {
-    const points = this.getRopeCurvePoints();
-    const result = this.renderer.createRope(points, 0.12, 0x6b5b4a);
-    this.ropeMesh = result.mesh;
-    this.ropeCurve = result.curve;
-    this.renderer.ropeGroup.add(result.mesh);
-  }
-
-  getRopeCurvePoints() {
-    const { ropeType, ropeCount, defaultLength } = this.template;
-    const points = [];
-    const R = defaultLength / (2 * Math.PI); // 圆形半径
-
-    switch (ropeType) {
-      case 'circle': {
-        const segments = 128;
-        const r = R;
-        for (let i = 0; i <= segments; i++) {
-          const angle = (i / segments) * Math.PI * 2;
-          points.push(new THREE.Vector3(Math.cos(angle) * r, 0, Math.sin(angle) * r));
-        }
-        break;
-      }
-      case 'uShape': {
-        const totalLen = defaultLength;
-        const halfLen = totalLen / 2;
-        const dropLen = totalLen * 0.25;
-        const segments = 100;
-        for (let i = 0; i <= segments; i++) {
-          const t = i / segments;
-          let x, y, z;
-          if (t < 0.15) {
-            const tt = t / 0.15;
-            x = -halfLen + tt * halfLen * 0.5;
-            y = -tt * dropLen * 0.5;
-            z = -tt * 1;
-          } else if (t < 0.85) {
-            const tt = (t - 0.15) / 0.7;
-            const angle = Math.PI * tt;
-            x = -halfLen * 0.5 + halfLen * 0.5 * (1 - Math.cos(angle));
-            y = -dropLen * 0.5 - dropLen * Math.sin(angle) * 0.8;
-            z = -1 + Math.sin(angle) * 0.5;
-          } else {
-            const tt = (t - 0.85) / 0.15;
-            x = -halfLen * 0.5 + halfLen * (1 - tt * 0.5);
-            y = -dropLen * 0.5 + tt * dropLen * 0.5;
-            z = -1 + 0.5 - tt * 0.5;
-          }
-          points.push(new THREE.Vector3(x, y, z));
-        }
-        break;
-      }
-      case 'straight': {
-        const segments = 80;
-        const totalLen = defaultLength;
-        for (let i = 0; i <= segments; i++) {
-          const t = i / segments;
-          points.push(new THREE.Vector3(0, totalLen * (0.5 - t), 0));
-        }
-        break;
-      }
-      case 'straight_hook': {
-        const segments = 100;
-        const totalLen = defaultLength;
-        for (let i = 0; i <= segments; i++) {
-          const t = i / segments;
-          let x = 0, y, z = 0;
-          if (t < 0.1) {
-            y = totalLen * (0.5 - t * totalLen * 0.1 / totalLen);
-            // 挂钩环
-            const angle = t / 0.1 * Math.PI * 2;
-            x = Math.cos(angle) * totalLen * 0.06;
-            z = Math.sin(angle) * totalLen * 0.06;
-          } else {
-            const tt = (t - 0.1) / 0.9;
-            y = totalLen * (0.5 - 0.1) - tt * totalLen * 0.8;
-          }
-          points.push(new THREE.Vector3(x, y, z));
-        }
-        break;
-      }
-      default: {
-        for (let i = 0; i <= 64; i++) {
-          const angle = (i / 64) * Math.PI * 2;
-          points.push(new THREE.Vector3(Math.cos(angle) * R, 0, Math.sin(angle) * R));
-        }
-      }
-    }
-    return points;
-  }
-
-  // === 珠子操作 ===
-  addBead(beadDef, size = null) {
-    const s = size || beadDef.defaultSize;
-    const bead = { beadDef, size: s, color: beadDef.color };
-    this.pushUndo({ type: 'add', index: this.beads.length });
-    this.beads.push(bead);
-    this.redoStack = [];
-    this.rebuildAllBeads();
-  }
-
-  removeBead(index) {
-    if (index < 0 || index >= this.beads.length) return;
-    const removed = this.beads[index];
-    this.pushUndo({ type: 'remove', index, bead: removed });
-    this.beads.splice(index, 1);
-    this.redoStack = [];
-    if (this.selectedBeadIndex === index) this.selectedBeadIndex = -1;
-    if (this.selectedBeadIndex > index) this.selectedBeadIndex--;
-    this.rebuildAllBeads();
-  }
-
-  moveBead(fromIndex, toIndex) {
-    if (fromIndex === toIndex) return;
-    if (fromIndex < 0 || fromIndex >= this.beads.length) return;
-    if (toIndex < 0 || toIndex >= this.beads.length) return;
-    this.pushUndo({ type: 'move', from: fromIndex, to: toIndex });
-    const [bead] = this.beads.splice(fromIndex, 1);
-    this.beads.splice(toIndex, 0, bead);
-    this.redoStack = [];
-    if (this.selectedBeadIndex === fromIndex) this.selectedBeadIndex = toIndex;
-    this.rebuildAllBeads();
-  }
-
-  updateBeadSize(index, size) {
-    if (index < 0 || index >= this.beads.length) return;
-    const oldSize = this.beads[index].size;
-    if (oldSize === size) return;
-    this.pushUndo({ type: 'edit', index, field: 'size', oldValue: oldSize, newValue: size });
-    this.beads[index].size = size;
-    this.redoStack = [];
-    this.rebuildAllBeads();
-  }
-
-  updateBeadColor(index, color) {
-    if (index < 0 || index >= this.beads.length) return;
-    const oldColor = this.beads[index].color;
-    if (oldColor === color) return;
-    this.pushUndo({ type: 'edit', index, field: 'color', oldValue: oldColor, newValue: color });
-    this.beads[index].color = color;
-    this.redoStack = [];
-    this.rebuildAllBeads();
-  }
-
-  clearBeads() {
-    this.beads = [];
-    this.beadMeshes = [];
-    this.renderer.clear();
-    this.selectedBeadIndex = -1;
-  }
-
-  // 重建所有珠子3D模型
-  rebuildAllBeads() {
-    // 清除旧模型
-    this.renderer.clear();
-    this.beadMeshes = [];
-
-    if (this.beads.length === 0) {
-      this.rebuildRope();
-      return;
-    }
-
-    // 获取曲线采样点
-    const points = this.getRopeCurvePoints();
-    const curve = new THREE.CatmullRomCurve3(points);
-    this.ropeCurve = curve;
-
-    // 计算珠子在曲线上的位置
-    const totalBeads = this.beads.length;
-    const curveLength = curve.getLength();
-
-    // 为每颗珠子计算曲线位置
-    for (let i = 0; i < totalBeads; i++) {
-      const bead = this.beads[i];
-      const t = totalBeads > 1 ? i / (totalBeads - 1) : 0.5;
-      // 使用弧长参数化
-      const point = curve.getPointAt(Math.max(0.01, Math.min(0.99, t)));
-      const tangent = curve.getTangentAt(Math.max(0.01, Math.min(0.99, t)));
-
-      const mesh = this.renderer.createBeadMesh(
-        { ...bead.beadDef, color: bead.color },
-        bead.size
-      );
-      mesh.position.copy(point);
-
-      // 使珠子朝向切线方向
-      const quaternion = new THREE.Quaternion();
-      const up = new THREE.Vector3(0, 1, 0);
-      quaternion.setFromUnitVectors(up, tangent.normalize());
-      mesh.setRotationFromQuaternion(quaternion);
-
-      this.renderer.beadsGroup.add(mesh);
-      this.beadMeshes.push(mesh);
-    }
-
-    // 重建串绳
-    this.renderer.ropeGroup.clear();
-    const ropeResult = this.renderer.createRope(points, 0.12, 0x6b5b4a);
-    this.ropeMesh = ropeResult.mesh;
-    this.renderer.ropeGroup.add(ropeResult.mesh);
-  }
-
-  // 高亮选中的珠子
-  highlightBead(index) {
-    this.beadMeshes.forEach((mesh, i) => {
-      if (mesh.userData.mainMesh) {
-        const emissive = i === index ? 0x333333 : 0x000000;
-        mesh.userData.mainMesh.material.emissive = new THREE.Color(emissive);
-        mesh.userData.mainMesh.material.emissiveIntensity = i === index ? 0.4 : 0;
-      }
-    });
-    this.selectedBeadIndex = index;
-  }
-
-  // === 撤销重做 ===
-  pushUndo(action) {
-    this.undoStack.push(action);
-    if (this.undoStack.length > this.maxUndo) {
-      this.undoStack.shift();
-    }
-  }
-
-  undo() {
-    if (this.undoStack.length === 0) return false;
-    const action = this.undoStack.pop();
-    this.redoStack.push(action);
-
-    switch (action.type) {
-      case 'add':
-        this.beads.splice(action.index, 1);
-        break;
-      case 'remove':
-        this.beads.splice(action.index, 0, action.bead);
-        break;
-      case 'move':
-        const [bead] = this.beads.splice(action.to, 1);
-        this.beads.splice(action.from, 0, bead);
-        break;
-      case 'edit':
-        this.beads[action.index][action.field] = action.oldValue;
-        break;
-    }
-    this.rebuildAllBeads();
-    return true;
-  }
-
-  redo() {
-    if (this.redoStack.length === 0) return false;
-    const action = this.redoStack.pop();
-    this.undoStack.push(action);
-
-    switch (action.type) {
-      case 'add':
-        this.beads.splice(action.index, 0, action.bead || { beadDef: BEAD_LIBRARY[0], size: 8, color: 'white' });
-        break;
-      case 'remove':
-        this.beads.splice(action.index, 1);
-        break;
-      case 'move':
-        const [bead] = this.beads.splice(action.from, 1);
-        this.beads.splice(action.to, 0, bead);
-        break;
-      case 'edit':
-        this.beads[action.index][action.field] = action.newValue;
-        break;
-    }
-    this.rebuildAllBeads();
-    return true;
-  }
-
-  canUndo() { return this.undoStack.length > 0; }
-  canRedo() { return this.redoStack.length > 0; }
-
-  // === 统计信息 ===
-  getTotalLength() {
-    let total = 0;
-    this.beads.forEach(b => { total += b.size; });
-    // 加上珠子间隙（约0.5mm/颗）
-    total += this.beads.length * 0.5;
-    return Math.round(total);
-  }
-
-  getBeadCount() { return this.beads.length; }
-
-  // === 序列化 ===
-  toJSON() {
-    return {
-      templateId: this.template.id,
-      beads: this.beads.map(b => ({
-        beadId: b.beadDef.id,
-        size: b.size,
-        color: b.color
-      }))
-    };
-  }
-
-  fromJSON(json) {
-    this.template = TEMPLATES.find(t => t.id === json.templateId) || TEMPLATES[0];
-    this.beads = json.beads.map(b => {
-      const def = BEAD_LIBRARY.find(d => d.id === b.beadId);
-      return def ? { beadDef: def, size: b.size, color: b.color } : null;
-    }).filter(Boolean);
-    this.undoStack = [];
-    this.redoStack = [];
-    this.rebuildAllBeads();
-  }
-}
-
-
-// === main.js ===
-
-
-
-
-class App {
-  constructor() {
-    try {
-      this.renderer = null;
-      this.engine = null;
-      this.workManager = new WorkManager();
-      this.currentWorkId = null;
-      this.exportBg = 'transparent';
-      this.activeFilter = 'all';
-      this.filteredBeads = [...BEAD_LIBRARY];
-
-      this.init();
-    } catch (e) {
-      console.error('App init error:', e);
-      // 确保基本UI可见
-      document.getElementById('page-home').classList.add('active');
-    }
-  }
-
-  init() {
-    // 绑定UI事件（无论WebGL是否可用）
-    this.bindHomeEvents();
-    this.bindTemplateEvents();
-    this.bindDesignerEvents();
-    this.bindExportEvents();
-    this.bindWorksEvents();
-    this.bindSaveEvents();
-    this.bindBeadEditEvents();
+const BEAD_COLORS = {
+  red:{hex:'#c0392b',name:'红'}, orange:{hex:'#e67e22',name:'橙'}, yellow:{hex:'#f1c40f',name:'黄'},
+  green:{hex:'#27ae60',name:'绿'}, blue:{hex:'#2980b9',name:'蓝'}, purple:{hex:'#8e44ad',name:'紫'},
+  white:{hex:'#ecf0f1',name:'白'}, black:{hex:'#2c3e50',name:'黑'}, pink:{hex:'#e8a0bf',name:'粉'},
+  brown:{hex:'#8b5e3c',name:'棕'}, teal:{hex:'#1abc9c',name:'青'},
+  gold:{hex:'#f0c040',name:'金'}, silver:{hex:'#c0c0c0',name:'银'}, rosegold:{hex:'#e8b4b8',name:'玫瑰金'}
+};
+
+// 珠子数据库
+var BEAD_LIBRARY = [];
+(function buildLib(){
+  var id=0;
+  [{c:'pink',n:'粉晶圆珠',m:'crystal',s:'round'},{c:'purple',n:'紫晶圆珠',m:'crystal',s:'round'},{c:'white',n:'白晶圆珠',m:'crystal',s:'round'},{c:'yellow',n:'黄晶圆珠',m:'crystal',s:'round'},{c:'brown',n:'茶晶圆珠',m:'crystal',s:'round'},{c:'blue',n:'蓝晶圆珠',m:'crystal',s:'round'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[6,8,10,12],defaultSize:8});});
+  [{c:'pink',n:'粉晶桶珠',m:'crystal',s:'barrel'},{c:'purple',n:'紫晶桶珠',m:'crystal',s:'barrel'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[8,10,12],defaultSize:10});});
+  [{c:'green',n:'翡翠圆珠',m:'jade',s:'round'},{c:'white',n:'和田圆珠',m:'jade',s:'round'},{c:'red',n:'玛瑙圆珠',m:'jade',s:'round'},{c:'blue',n:'青金石圆珠',m:'jade',s:'round'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[6,8,10,12],defaultSize:8});});
+  [{c:'green',n:'翡翠桶珠',m:'jade',s:'barrel'},{c:'red',n:'玛瑙桶珠',m:'jade',s:'barrel'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[8,10,12],defaultSize:10});});
+  BEAD_LIBRARY.push({id:id++,name:'翡翠算盘珠',material:'jade',shape:'abacus',color:'green',sizes:[8,10],defaultSize:8});
+  BEAD_LIBRARY.push({id:id++,name:'貔貅雕刻',material:'jade',shape:'carving',color:'green',sizes:[10,12,14],defaultSize:12});
+  BEAD_LIBRARY.push({id:id++,name:'平安扣雕刻',material:'jade',shape:'carving',color:'white',sizes:[10,12,14],defaultSize:12});
+  [{c:'brown',n:'檀木圆珠',m:'wood',s:'round'},{c:'black',n:'菩提圆珠',m:'wood',s:'round'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[8,10,12],defaultSize:10});});
+  BEAD_LIBRARY.push({id:id++,name:'檀木桶珠',material:'wood',shape:'barrel',color:'brown',sizes:[10,12],defaultSize:10});
+  BEAD_LIBRARY.push({id:id++,name:'莲花雕刻',material:'wood',shape:'carving',color:'brown',sizes:[10,12,14],defaultSize:12});
+  [{c:'silver',n:'银圆珠',m:'metal',s:'round'},{c:'gold',n:'金圆珠',m:'metal',s:'round'},{c:'rosegold',n:'玫瑰金圆珠',m:'metal',s:'round'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[4,6,8,10],defaultSize:6});});
+  [{c:'silver',n:'银隔片',m:'metal',s:'spacer'},{c:'gold',n:'金隔片',m:'metal',s:'spacer'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[4,6],defaultSize:4});});
+  [{c:'white',n:'白瓷圆珠',m:'ceramic',s:'round'},{c:'blue',n:'青花圆珠',m:'ceramic',s:'round'},{c:'teal',n:'彩釉圆珠',m:'ceramic',s:'round'}].forEach(function(x){BEAD_LIBRARY.push({id:id++,name:x.n,material:x.m,shape:x.s,color:x.c,sizes:[8,10,12],defaultSize:10});});
+  BEAD_LIBRARY.push({id:id++,name:'青花桶珠',material:'ceramic',shape:'barrel',color:'blue',sizes:[10,12],defaultSize:10});
+  BEAD_LIBRARY.push({id:id++,name:'青花算盘珠',material:'ceramic',shape:'abacus',color:'blue',sizes:[8,10],defaultSize:8});
+})();
+
+// ========== 作品管理 ==========
+var STORAGE_KEY = 'bead_designer_works';
+function loadWorks(){ try{ var d=localStorage.getItem(STORAGE_KEY); return d?JSON.parse(d):[]; }catch(e){ return[]; } }
+function saveWorks(works){ localStorage.setItem(STORAGE_KEY, JSON.stringify(works)); }
+function addWork(name, data){ var w={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:name||'设计_'+new Date().toLocaleDateString('zh-CN').replace(/\//g,''),designData:data,createdAt:new Date().toISOString(),beadCount:data.beads?data.beads.length:0}; var works=loadWorks(); works.unshift(w); saveWorks(works); return w; }
+function updateWork(id, data){ var works=loadWorks(); var w=works.find(function(x){return x.id===id;}); if(!w) return null; w.designData=data; w.beadCount=data.beads?data.beads.length:0; w.updatedAt=new Date().toISOString(); saveWorks(works); return w; }
+function deleteWork(id){ var works=loadWorks(); works=works.filter(function(x){return x.id!==id;}); saveWorks(works); }
+function getWork(id){ return loadWorks().find(function(x){return x.id===id;}); }
+function getWorksCount(){ return loadWorks().length; }
+
+// ========== App ==========
+var app = {
+  currentTemplateId: 'bracelet_single',
+  currentWorkId: null,
+  beads: [],
+  activeFilter: 'all',
+  exportBg: 'transparent',
+  undoStack: [],
+  redoStack: [],
+
+  init: function(){
+    this.bindEvents();
     this.updateWorksCount();
+    console.log('串珠妙计 2D 版本已启动 ✓');
+  },
 
-    // 尝试初始化3D，失败则降级
-    try {
-      const hasWebGL = this.checkWebGL();
-      if (!hasWebGL) {
-        console.warn('WebGL not available, running in fallback mode');
-        this.showWebGLFallback();
-        return;
-      }
-      // 初始化首页3D预览
-      setTimeout(() => this.initHomePreview(), 300);
-      // 初始化设计画布
-      setTimeout(() => this.initDesigner(), 500);
-    } catch (e) {
-      console.error('3D init error:', e);
-      this.showWebGLFallback();
-    }
-  }
+  bindEvents: function(){
+    var self = this;
+    document.getElementById('btn-start-design').onclick = function(){ self.showModal('modal-template'); self.renderTemplateGrid(); };
+    document.getElementById('btn-my-works').onclick = function(){ self.showPage('page-works'); self.renderWorksList(); };
+    document.getElementById('btn-close-template').onclick = function(){ self.hideModal('modal-template'); };
+    document.getElementById('btn-back').onclick = function(){ self.showPage('page-home'); };
+    document.getElementById('btn-undo').onclick = function(){ self.undo(); };
+    document.getElementById('btn-redo').onclick = function(){ self.redo(); };
+    document.getElementById('btn-save').onclick = function(){ self.openSaveDialog(); };
+    document.getElementById('btn-export').onclick = function(){ if(self.beads.length===0){self.showToast('请先添加珠子');return;} self.showModal('modal-export'); };
+    document.getElementById('btn-close-export').onclick = function(){ self.hideModal('modal-export'); };
+    document.getElementById('btn-confirm-export').onclick = function(){ self.doExport(); };
+    document.getElementById('btn-close-save').onclick = function(){ self.hideModal('modal-save'); };
+    document.getElementById('btn-confirm-save').onclick = function(){ self.doSave(); };
+    document.getElementById('btn-close-edit').onclick = function(){ self.hideModal('modal-bead-edit'); };
+    document.getElementById('btn-delete-bead').onclick = function(){ self.deleteSelectedBead(); };
+    document.getElementById('btn-works-back').onclick = function(){ self.showPage('page-home'); };
 
-  showWebGLFallback() {
-    const hero = document.getElementById('hero-canvas');
-    if (hero) {
-      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
-    }
-  }
-
-  checkWebGL() {
-    try {
-      const canvas = document.createElement('canvas');
-      return !!(canvas.getContext('webgl') || canvas.getContext('webgl2'));
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // === 首页 ===
-  initHomePreview() {
-    const container = document.getElementById('hero-canvas');
-    const previewRenderer = new BeadRenderer(container);
-    if (!previewRenderer.webglAvailable || !previewRenderer.renderer) {
-      container.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
-      return;
-    }
-    previewRenderer.setBackground('white');
-
-    // 精选示例珠子：粉晶圆珠 + 金隔片交替，对比鲜明
-    const pinkCrystal = BEAD_LIBRARY.find(b => b.material === 'crystal' && b.color === 'pink' && b.shape === 'round');
-    const goldSpacer = BEAD_LIBRARY.find(b => b.material === 'metal' && b.color === 'gold' && b.shape === 'spacer');
-    const greenJade = BEAD_LIBRARY.find(b => b.material === 'jade' && b.color === 'green' && b.shape === 'round');
-    const silverBead = BEAD_LIBRARY.find(b => b.material === 'metal' && b.color === 'silver' && b.shape === 'round');
-
-    // 用10颗珠子做示例，颜色对比明显
-    const demoBeads = [
-      pinkCrystal, goldSpacer, greenJade, goldSpacer,
-      pinkCrystal, silverBead, greenJade, goldSpacer,
-      pinkCrystal, goldSpacer
-    ].filter(Boolean);
-
-    // 生成环形路径
-    const points = [];
-    const R = 2.5;
-    for (let i = 0; i <= 128; i++) {
-      const angle = (i / 128) * Math.PI * 2;
-      points.push(new THREE.Vector3(Math.cos(angle) * R, 0, Math.sin(angle) * R));
-    }
-    const result = previewRenderer.createRope(points, 0.1, 0x8b7355);
-    previewRenderer.ropeGroup.add(result.mesh);
-    const curve = result.curve;
-
-    // 放置珠子
-    for (let i = 0; i < demoBeads.length; i++) {
-      const t = i / demoBeads.length;
-      const point = curve.getPointAt(t);
-      const bead = demoBeads[i];
-      const mesh = previewRenderer.createBeadMesh(bead, bead.defaultSize);
-      mesh.position.copy(point);
-      previewRenderer.beadsGroup.add(mesh);
-    }
-    this.homePreviewRenderer = previewRenderer;
-  }
-
-  initDesigner() {
-    const container = document.getElementById('designer-canvas');
-    this.renderer = new BeadRenderer(container);
-    this.renderer.setBackground('white');
-    this.engine = new DesignEngine(this.renderer);
-  }
-
-  bindHomeEvents() {
-    document.getElementById('btn-start-design').addEventListener('click', () => {
-      this.showModal('modal-template');
-      this.renderTemplateGrid();
+    document.querySelectorAll('.export-option').forEach(function(opt){
+      opt.onclick = function(){
+        document.querySelectorAll('.export-option').forEach(function(o){o.classList.remove('active');});
+        opt.classList.add('active');
+        self.exportBg = opt.dataset.bg;
+      };
     });
-    document.getElementById('btn-my-works').addEventListener('click', () => {
-      this.showPage('page-works');
-      this.renderWorksList();
-    });
-  }
 
-  // === 模板选择 ===
-  bindTemplateEvents() {
-    document.getElementById('btn-close-template').addEventListener('click', () => {
-      this.hideModal('modal-template');
-    });
-  }
+    this.renderBeadFilters();
+  },
 
-  renderTemplateGrid() {
-    const grid = document.getElementById('template-grid');
+  // ===== 模板 =====
+  renderTemplateGrid: function(){
+    var grid = document.getElementById('template-grid');
     grid.innerHTML = '';
-    TEMPLATES.forEach(tpl => {
-      const item = document.createElement('div');
+    TEMPLATES.forEach(function(tpl){
+      var item = document.createElement('div');
       item.className = 'template-item';
-      item.innerHTML = `
-        <div class="template-icon">${tpl.icon}</div>
-        <div class="template-name">${tpl.name}</div>
-        <div class="template-desc">${tpl.desc}</div>
-      `;
-      item.addEventListener('click', () => {
-        this.hideModal('modal-template');
-        this.startNewDesign(tpl.id);
-      });
+      item.innerHTML = '<div class="template-icon">'+tpl.icon+'</div><div class="template-name">'+tpl.name+'</div><div class="template-desc">'+tpl.desc+'</div>';
+      item.onclick = function(){ app.hideModal('modal-template'); app.startDesign(tpl.id); };
       grid.appendChild(item);
     });
-  }
+  },
 
-  startNewDesign(templateId) {
-    if (!this.engine) {
-      this.showToast('3D引擎不可用，请使用支持WebGL的浏览器');
-      return;
-    }
+  startDesign: function(templateId){
+    this.currentTemplateId = templateId;
     this.currentWorkId = null;
+    this.beads = [];
+    this.undoStack = [];
+    this.redoStack = [];
+    var tpl = TEMPLATES.find(function(t){return t.id===templateId;});
+    document.getElementById('current-template-name').textContent = tpl?tpl.name:'手串·单圈';
     this.showPage('page-designer');
-    this.engine.setTemplate(templateId);
-    document.getElementById('current-template-name').textContent =
-      TEMPLATES.find(t => t.id === templateId)?.name || '手串·单圈';
-    this.updateDesignerInfo();
-    this.updateUndoRedoButtons();
     this.renderBeadList();
-  }
+    this.updateInfo();
+    this.updateUndoRedo();
+  },
 
-  // === 设计画布 ===
-  bindDesignerEvents() {
-    document.getElementById('btn-back').addEventListener('click', () => {
-      this.showPage('page-home');
-    });
-    document.getElementById('btn-undo').addEventListener('click', () => {
-      if (!this.engine) return;
-      this.engine.undo();
-      this.updateDesignerInfo();
-      this.updateUndoRedoButtons();
-    });
-    document.getElementById('btn-redo').addEventListener('click', () => {
-      if (!this.engine) return;
-      this.engine.redo();
-      this.updateDesignerInfo();
-      this.updateUndoRedoButtons();
-    });
-    document.getElementById('btn-save').addEventListener('click', () => {
-      this.openSaveDialog();
-    });
-    document.getElementById('btn-export').addEventListener('click', () => {
-      if (!this.engine || this.engine.getBeadCount() === 0) {
-        this.showToast('请先添加珠子');
-        return;
-      }
-      this.showModal('modal-export');
-    });
-
-    // 珠子库筛选
-    this.renderBeadFilters();
-  }
-
-  renderBeadFilters() {
-    const container = document.getElementById('bead-filters');
-    const categories = [
-      { key: 'all', label: '全部' },
-      { key: 'crystal', label: '水晶' },
-      { key: 'jade', label: '玉石' },
-      { key: 'wood', label: '木质' },
-      { key: 'metal', label: '金属' },
-      { key: 'ceramic', label: '陶瓷' },
-    ];
+  // ===== 珠子列表 =====
+  renderBeadFilters: function(){
+    var self = this;
+    var container = document.getElementById('bead-filters');
+    var cats = [{key:'all',label:'全部'},{key:'crystal',label:'水晶'},{key:'jade',label:'玉石'},{key:'wood',label:'木质'},{key:'metal',label:'金属'},{key:'ceramic',label:'陶瓷'}];
     container.innerHTML = '';
-    categories.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn' + (cat.key === this.activeFilter ? ' active' : '');
+    cats.forEach(function(cat){
+      var btn = document.createElement('button');
+      btn.className = 'filter-btn'+(cat.key===self.activeFilter?' active':'');
       btn.textContent = cat.label;
-      btn.addEventListener('click', () => {
-        this.activeFilter = cat.key;
-        this.renderBeadFilters();
-        this.renderBeadList();
-      });
+      btn.onclick = function(){ self.activeFilter=cat.key; self.renderBeadFilters(); self.renderBeadList(); };
       container.appendChild(btn);
     });
-  }
+  },
 
-  renderBeadList() {
-    const container = document.getElementById('bead-list');
+  renderBeadList: function(){
+    var self = this;
+    var container = document.getElementById('bead-list');
     container.innerHTML = '';
-
-    this.filteredBeads = this.activeFilter === 'all'
-      ? BEAD_LIBRARY
-      : BEAD_LIBRARY.filter(b => b.material === this.activeFilter);
-
-    this.filteredBeads.forEach(bead => {
-      const item = document.createElement('div');
+    var beads = this.activeFilter==='all' ? BEAD_LIBRARY : BEAD_LIBRARY.filter(function(b){return b.material===self.activeFilter;});
+    beads.forEach(function(bead){
+      var item = document.createElement('div');
       item.className = 'bead-item';
-      const colorHex = BEAD_COLORS[bead.color]?.hex || '#ccc';
-      item.innerHTML = `
-        <div class="bead-thumb" style="background: radial-gradient(circle at 35% 35%, ${this.lightenColor(colorHex)}, ${colorHex})"></div>
-        <div class="bead-label">${bead.name}</div>
-      `;
-      item.addEventListener('click', () => {
-        if (!this.engine) return;
-        this.engine.addBead(bead);
-        this.updateDesignerInfo();
-        this.updateUndoRedoButtons();
-      });
+      var hex = (BEAD_COLORS[bead.color]||{}).hex || '#ccc';
+      var r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+      var light = 'rgb('+Math.min(255,r+80)+','+Math.min(255,g+80)+','+Math.min(255,b+80)+')';
+      item.innerHTML = '<div class="bead-thumb" style="background:radial-gradient(circle at 35% 35%, '+light+', '+hex+')"></div><div class="bead-label">'+bead.name+'</div>';
+      item.onclick = function(){ self.addBead(bead); };
       container.appendChild(item);
     });
-  }
+  },
 
-  lightenColor(hex) {
-    const r = parseInt(hex.slice(1,3), 16);
-    const g = parseInt(hex.slice(3,5), 16);
-    const b = parseInt(hex.slice(5,7), 16);
-    const lr = Math.min(255, r + 80);
-    const lg = Math.min(255, g + 80);
-    const lb = Math.min(255, b + 80);
-    return `rgb(${lr},${lg},${lb})`;
-  }
+  addBead: function(beadDef){
+    this.undoStack.push({type:'add',bead:{beadDef:beadDef,size:beadDef.defaultSize,color:beadDef.color}});
+    this.redoStack = [];
+    this.beads.push({beadDef:beadDef,size:beadDef.defaultSize,color:beadDef.color});
+    this.updateInfo();
+    this.updateUndoRedo();
+    this.showToast('已添加: '+beadDef.name);
+  },
 
-  updateDesignerInfo() {
-    if (!this.engine) return;
-    document.getElementById('bead-count').textContent = this.engine.getBeadCount();
-    document.getElementById('total-length').textContent = this.engine.getTotalLength();
-  }
+  deleteSelectedBead: function(){
+    var idx = this.selectedBeadIndex;
+    if(idx===undefined||idx<0||idx>=this.beads.length) return;
+    var removed = this.beads[idx];
+    this.undoStack.push({type:'remove',bead:removed,index:idx});
+    this.redoStack = [];
+    this.beads.splice(idx,1);
+    this.selectedBeadIndex = -1;
+    this.hideModal('modal-bead-edit');
+    this.updateInfo();
+    this.updateUndoRedo();
+  },
 
-  updateUndoRedoButtons() {
-    if (!this.engine) {
-      document.getElementById('btn-undo').disabled = true;
-      document.getElementById('btn-redo').disabled = true;
-      return;
-    }
-    document.getElementById('btn-undo').disabled = !this.engine.canUndo();
-    document.getElementById('btn-redo').disabled = !this.engine.canRedo();
-  }
-
-  // === 珠子编辑 ===
-  bindBeadEditEvents() {
-    document.getElementById('btn-close-edit').addEventListener('click', () => {
-      this.hideModal('modal-bead-edit');
-    });
-    document.getElementById('btn-delete-bead').addEventListener('click', () => {
-      const idx = this.engine.selectedBeadIndex;
-      if (idx >= 0) {
-        this.engine.removeBead(idx);
-        this.hideModal('modal-bead-edit');
-        this.updateDesignerInfo();
-        this.updateUndoRedoButtons();
-      }
-    });
-  }
-
-  openBeadEdit(index) {
-    if (!this.engine) return;
-    const bead = this.engine.beads[index];
-    if (!bead) return;
-
+  openBeadEdit: function(index){
+    var bead = this.beads[index];
+    if(!bead) return;
+    this.selectedBeadIndex = index;
     document.getElementById('edit-bead-name').textContent = bead.beadDef.name;
-    this.engine.highlightBead(index);
 
-    // 尺寸选项
-    const sizesContainer = document.getElementById('edit-sizes');
+    var sizesContainer = document.getElementById('edit-sizes');
     sizesContainer.innerHTML = '';
-    bead.beadDef.sizes.forEach(s => {
-      const btn = document.createElement('button');
-      btn.className = 'size-opt' + (bead.size === s ? ' active' : '');
-      btn.textContent = s + 'mm';
-      btn.addEventListener('click', () => {
-        this.engine.updateBeadSize(index, s);
-        this.updateDesignerInfo();
-        this.updateUndoRedoButtons();
-        this.openBeadEdit(index); // 刷新面板
-      });
+    bead.beadDef.sizes.forEach(function(s){
+      var btn = document.createElement('button');
+      btn.className = 'size-opt'+(bead.size===s?' active':'');
+      btn.textContent = s+'mm';
+      btn.onclick = function(){ bead.size=s; app.updateInfo(); app.showModal('modal-bead-edit'); app.openBeadEdit(index); };
       sizesContainer.appendChild(btn);
     });
 
-    // 颜色选项
-    const colorsContainer = document.getElementById('edit-colors');
+    var colorsContainer = document.getElementById('edit-colors');
     colorsContainer.innerHTML = '';
-    const availableColors = this.getAvailableColors(bead.beadDef.material);
-    availableColors.forEach(c => {
-      const btn = document.createElement('button');
-      btn.className = 'color-opt' + (bead.color === c.key ? ' active' : '');
-      btn.innerHTML = `<span class="color-dot" style="background:${c.hex}"></span>${c.name}`;
-      btn.addEventListener('click', () => {
-        this.engine.updateBeadColor(index, c.key);
-        this.updateUndoRedoButtons();
-        this.openBeadEdit(index); // 刷新面板
-      });
+    var colorKeys = {crystal:['pink','purple','white','yellow','brown','blue'],jade:['green','white','red','blue'],wood:['brown','black'],metal:['silver','gold','rosegold'],ceramic:['white','blue','teal']};
+    var keys = colorKeys[bead.beadDef.material] || Object.keys(BEAD_COLORS).slice(0,8);
+    keys.forEach(function(k){
+      var c = BEAD_COLORS[k];
+      var btn = document.createElement('button');
+      btn.className = 'color-opt'+(bead.color===k?' active':'');
+      btn.innerHTML = '<span class="color-dot" style="background:'+c.hex+'"></span>'+c.name;
+      btn.onclick = function(){ bead.color=k; app.updateInfo(); app.showModal('modal-bead-edit'); app.openBeadEdit(index); };
       colorsContainer.appendChild(btn);
     });
 
     this.showModal('modal-bead-edit');
-  }
+  },
 
-  getAvailableColors(material) {
-    // 根据材质返回合理的颜色列表
-    const colorMap = {
-      crystal: ['pink','purple','white','yellow','brown','blue'],
-      jade: ['green','white','red','blue'],
-      wood: ['brown','black'],
-      metal: ['silver','gold','rosegold'],
-      ceramic: ['white','blue','teal']
-    };
-    const keys = colorMap[material] || Object.keys(BEAD_COLORS).slice(0, 8);
-    return keys.map(k => ({ key: k, name: BEAD_COLORS[k].name, hex: BEAD_COLORS[k].hex }));
-  }
+  undo: function(){
+    if(this.undoStack.length===0) return;
+    var action = this.undoStack.pop();
+    this.redoStack.push(action);
+    if(action.type==='add') this.beads.pop();
+    else if(action.type==='remove') this.beads.splice(action.index,0,action.bead);
+    this.updateInfo();
+    this.updateUndoRedo();
+  },
 
-  // 设计画布上点击珠子（通过Raycaster或在3D中添加）
-  // 简化方案：通过双击3D场景中的珠子来编辑
-  setupBeadClickHandler() {
-    // 在renderer中处理：双击珠子触发编辑
-    // 此功能在后续迭代中实现
-  }
+  redo: function(){
+    if(this.redoStack.length===0) return;
+    var action = this.redoStack.pop();
+    this.undoStack.push(action);
+    if(action.type==='add') this.beads.push(action.bead);
+    else if(action.type==='remove') this.beads.splice(action.index,1);
+    this.updateInfo();
+    this.updateUndoRedo();
+  },
 
-  // === 导出 ===
-  bindExportEvents() {
-    document.getElementById('btn-close-export').addEventListener('click', () => {
-      this.hideModal('modal-export');
-    });
-    document.querySelectorAll('.export-option').forEach(opt => {
-      opt.addEventListener('click', () => {
-        document.querySelectorAll('.export-option').forEach(o => o.classList.remove('active'));
-        opt.classList.add('active');
-        this.exportBg = opt.dataset.bg;
-      });
-    });
-    document.getElementById('btn-confirm-export').addEventListener('click', () => {
-      this.doExport();
-    });
-  }
+  updateInfo: function(){
+    document.getElementById('bead-count').textContent = this.beads.length;
+    var total = 0;
+    this.beads.forEach(function(b){total+=b.size;});
+    total += this.beads.length * 0.5;
+    document.getElementById('total-length').textContent = Math.round(total);
+  },
 
-  doExport() {
-    if (!this.renderer) return;
-    this.hideModal('modal-export');
-    this.showModal('modal-exporting');
+  updateUndoRedo: function(){
+    document.getElementById('btn-undo').disabled = this.undoStack.length===0;
+    document.getElementById('btn-redo').disabled = this.redoStack.length===0;
+  },
 
-    // 短暂延迟让UI更新
-    setTimeout(() => {
-      const bgType = this.exportBg;
-      const format = bgType === 'transparent' ? 'png' : 'jpeg';
+  updateWorksCount: function(){
+    document.getElementById('works-count').textContent = getWorksCount();
+  },
 
-      // 临时设置背景
-      const origBg = this.renderer.scene.background;
-      if (bgType === 'transparent') {
-        this.renderer.scene.background = null;
-      } else if (bgType === 'gradient') {
-        this.renderer.scene.background = new THREE.Color(0xfdf6f0);
-      } else {
-        this.renderer.scene.background = new THREE.Color(0xffffff);
-      }
-
-      const dataURL = this.renderer.exportImage(bgType, format);
-
-      // 恢复背景
-      this.renderer.scene.background = origBg;
-
-      // 添加水印（简化版）
-      this.addWatermarkToImage(dataURL, (watermarkedURL) => {
-        this.hideModal('modal-exporting');
-        this.downloadImage(watermarkedURL, `串珠妙计_${Date.now()}.${format}`);
-        this.showToast('导出成功！');
-      });
-    }, 300);
-  }
-
-  addWatermarkToImage(dataURL, callback) {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-
-      // 水印
-      const fontSize = Math.max(14, Math.floor(img.width * 0.025));
-      ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
-      ctx.fillStyle = 'rgba(139, 94, 60, 0.3)';
-      ctx.textAlign = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('📿 串珠妙计', img.width - fontSize, img.height - fontSize);
-
-      callback(canvas.toDataURL('image/png'));
-    };
-    img.src = dataURL;
-  }
-
-  downloadImage(dataURL, filename) {
-    const link = document.createElement('a');
-    link.href = dataURL;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  // === 保存 ===
-  bindSaveEvents() {
-    document.getElementById('btn-close-save').addEventListener('click', () => {
-      this.hideModal('modal-save');
-    });
-    document.getElementById('btn-confirm-save').addEventListener('click', () => {
-      this.doSave();
-    });
-  }
-
-  openSaveDialog() {
-    if (!this.engine || this.engine.getBeadCount() === 0) {
-      this.showToast('请先添加珠子');
-      return;
-    }
-    document.getElementById('input-work-name').value = this.currentWorkId
-      ? (this.workManager.getWork(this.currentWorkId)?.name || '')
-      : '';
+  // ===== 保存 =====
+  openSaveDialog: function(){
+    if(this.beads.length===0){ this.showToast('请先添加珠子'); return; }
+    var w = this.currentWorkId?getWork(this.currentWorkId):null;
+    document.getElementById('input-work-name').value = w?w.name:'';
     this.showModal('modal-save');
-    setTimeout(() => document.getElementById('input-work-name').focus(), 300);
-  }
+    setTimeout(function(){ document.getElementById('input-work-name').focus(); },300);
+  },
 
-  doSave() {
-    if (!this.engine) return;
-    const name = document.getElementById('input-work-name').value.trim() || `设计_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '')}`;
-    const designData = this.engine.toJSON();
-
-    // 生成缩略图
-    const origBg = this.renderer.scene.background;
-    this.renderer.scene.background = null;
-    const thumbDataURL = this.renderer.exportImage('transparent', 'png');
-    this.renderer.scene.background = origBg;
-
-    if (this.currentWorkId) {
-      this.workManager.updateWork(this.currentWorkId, designData, thumbDataURL);
-    } else {
-      const work = this.workManager.addWork(name, designData, thumbDataURL);
-      this.currentWorkId = work.id;
-    }
-
+  doSave: function(){
+    var name = document.getElementById('input-work-name').value.trim() || '设计_'+new Date().toLocaleDateString('zh-CN').replace(/\//g,'');
+    var data = {templateId:this.currentTemplateId,beads:this.beads.map(function(b){return{beadId:b.beadDef.id,size:b.size,color:b.color};})};
+    if(this.currentWorkId){ updateWork(this.currentWorkId, data); }
+    else { var w = addWork(name, data); this.currentWorkId = w.id; }
     this.hideModal('modal-save');
     this.showToast('保存成功！');
     this.updateWorksCount();
-  }
+  },
 
-  // === 作品列表 ===
-  bindWorksEvents() {
-    document.getElementById('btn-works-back').addEventListener('click', () => {
-      this.showPage('page-home');
-    });
-    document.getElementById('btn-works-create')?.addEventListener('click', () => {
-      this.showModal('modal-template');
-      this.renderTemplateGrid();
-    });
-  }
+  // ===== 导出(2D简化版) =====
+  doExport: function(){
+    this.hideModal('modal-export');
+    this.showToast('导出功能将在3D版本中启用');
+  },
 
-  renderWorksList() {
-    const container = document.getElementById('works-grid');
-    const works = this.workManager.getAllWorks();
-
-    if (works.length === 0) {
-      container.innerHTML = `
-        <div class="works-empty">
-          <div class="empty-icon">📿</div>
-          <p>还没有作品</p>
-          <button class="btn-primary" id="btn-works-create">去设计第一个吧</button>
-        </div>`;
-      document.getElementById('btn-works-create')?.addEventListener('click', () => {
-        this.showModal('modal-template');
-        this.renderTemplateGrid();
-      });
+  // ===== 作品列表 =====
+  renderWorksList: function(){
+    var container = document.getElementById('works-grid');
+    var works = loadWorks();
+    if(works.length===0){
+      container.innerHTML = '<div class="works-empty"><div class="empty-icon">📿</div><p>还没有作品</p><button class="btn-primary" id="btn-works-create">去设计第一个吧</button></div>';
+      document.getElementById('btn-works-create').onclick = function(){ app.showModal('modal-template'); app.renderTemplateGrid(); };
       return;
     }
-
     container.innerHTML = '';
-    works.forEach(work => {
-      const card = document.createElement('div');
+    works.forEach(function(work){
+      var card = document.createElement('div');
       card.className = 'work-card';
-      card.innerHTML = `
-        <div class="work-thumb">
-          ${work.thumbnail ? `<img src="${work.thumbnail}" alt="${work.name}">` : '<span style="font-size:32px">📿</span>'}
-        </div>
-        <div class="work-info">
-          <div class="work-name">${work.name}</div>
-          <div class="work-meta">
-            <span>${work.beadCount}颗</span>
-            <span>${new Date(work.createdAt).toLocaleDateString('zh-CN')}</span>
-          </div>
-        </div>
-        <div class="work-actions">
-          <button class="btn-edit-work" data-id="${work.id}">编辑</button>
-          <button class="btn-del" data-id="${work.id}">删除</button>
-        </div>
-      `;
-      card.querySelector('.work-thumb').addEventListener('click', () => {
-        this.openWork(work.id);
-      });
-      card.querySelector('.btn-edit-work').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.openWork(work.id);
-      });
-      card.querySelector('.btn-del').addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (confirm(`确定要删除「${work.name}」吗？删除后无法恢复。`)) {
-          this.workManager.deleteWork(work.id);
-          this.renderWorksList();
-          this.updateWorksCount();
-          this.showToast('已删除');
-        }
-      });
+      card.innerHTML = '<div class="work-thumb">📿</div><div class="work-info"><div class="work-name">'+work.name+'</div><div class="work-meta"><span>'+work.beadCount+'颗</span><span>'+new Date(work.createdAt).toLocaleDateString('zh-CN')+'</span></div></div><div class="work-actions"><button class="btn-edit" data-id="'+work.id+'">编辑</button><button class="btn-del" data-id="'+work.id+'">删除</button></div>';
+      card.querySelector('.work-thumb').onclick = function(){ app.openWork(work.id); };
+      card.querySelector('.btn-edit').onclick = function(e){ e.stopPropagation(); app.openWork(work.id); };
+      card.querySelector('.btn-del').onclick = function(e){ e.stopPropagation(); if(confirm('确定要删除「'+work.name+'」吗？')){ deleteWork(work.id); app.renderWorksList(); app.updateWorksCount(); app.showToast('已删除'); }};
       container.appendChild(card);
     });
-  }
+  },
 
-  openWork(workId) {
-    if (!this.engine) {
-      this.showToast('3D引擎不可用，请使用支持WebGL的浏览器');
-      return;
-    }
-    const work = this.workManager.getWork(workId);
-    if (!work) return;
+  openWork: function(workId){
+    var work = getWork(workId);
+    if(!work) return;
     this.currentWorkId = work.id;
+    this.currentTemplateId = work.designData.templateId;
+    this.beads = work.designData.beads.map(function(b){var def=BEAD_LIBRARY.find(function(d){return d.id===b.beadId;});return def?{beadDef:def,size:b.size,color:b.color}:null;}).filter(Boolean);
+    this.undoStack = [];
+    this.redoStack = [];
+    var tpl = TEMPLATES.find(function(t){return t.id===work.designData.templateId;});
+    document.getElementById('current-template-name').textContent = tpl?tpl.name:'手串·单圈';
     this.showPage('page-designer');
-    this.engine.fromJSON(work.designData);
-    document.getElementById('current-template-name').textContent =
-      TEMPLATES.find(t => t.id === work.designData.templateId)?.name || '手串·单圈';
-    this.updateDesignerInfo();
-    this.updateUndoRedoButtons();
     this.renderBeadList();
-  }
+    this.updateInfo();
+    this.updateUndoRedo();
+  },
 
-  updateWorksCount() {
-    document.getElementById('works-count').textContent = this.workManager.getCount();
-  }
-
-  // === 页面导航 ===
-  showPage(pageId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // ===== 页面导航 =====
+  showPage: function(pageId){
+    document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
     document.getElementById(pageId).classList.add('active');
+  },
 
-    if (pageId === 'page-designer') {
-      setTimeout(() => this.renderer?.resize(), 100);
-    }
-  }
-
-  showModal(modalId) {
+  showModal: function(modalId){
     document.getElementById(modalId).classList.add('show');
-  }
+  },
 
-  hideModal(modalId) {
+  hideModal: function(modalId){
     document.getElementById(modalId).classList.remove('show');
-  }
+  },
 
-  showToast(msg) {
-    const toast = document.getElementById('toast');
+  showToast: function(msg){
+    var toast = document.getElementById('toast');
     toast.textContent = msg;
     toast.classList.add('show');
-    clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(function(){toast.classList.remove('show');},2000);
   }
-}
+};
 
-// 启动应用
-window.THREE = THREE;
-
-(function startApp() {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startApp);
-    return;
-  }
-  console.log('串珠妙计 starting...');
-  try {
-    window.app = new App();
-    console.log('App started successfully');
-  } catch(e) {
-    console.error('App start error:', e);
-    var home = document.getElementById('page-home');
-    if (home) home.classList.add('active');
-    var hero = document.getElementById('hero-canvas');
-    if (hero && !hero.querySelector('div')) {
-      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
-    }
-  }
-})();
+// 启动
+document.addEventListener('DOMContentLoaded', function(){
+  app.init();
+});
 </script>
-
 </body>
 </html>
