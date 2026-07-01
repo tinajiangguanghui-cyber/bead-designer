@@ -469,7 +469,8 @@ var app = {
     var defaultSize = this._lastBeadSize || beadDef.defaultSize || 8;
     for(var s=4; s<=15; s+=0.5){
       var btn = document.createElement('button');
-      btn.className = 'size-opt'+(s===defaultSize?' active':'');
+      var isActive = Math.abs(s - defaultSize) < 0.01;
+      btn.className = 'size-opt'+(isActive?' active':'');
       btn.textContent = s+'mm';
       btn.onclick = function(size){
         return function(){
