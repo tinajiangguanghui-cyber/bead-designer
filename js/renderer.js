@@ -8,9 +8,9 @@ export class BeadRenderer {
     this.ropeGroup = new THREE.Group();
     this.webglAvailable = true;
 
-    // 相机
+    // 相机 - 初始视角正对环形手串正面
     this.camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-    this.camera.position.set(0, 2.5, 12);
+    this.camera.position.set(0, 8, 0); // 从正上方俯视
     this.camera.lookAt(0, 0, 0);
 
     // 渲染器 - 尝试创建WebGL上下文
@@ -46,13 +46,13 @@ export class BeadRenderer {
     if (this.renderer) {
       this.container.appendChild(this.renderer.domElement);
       this.resize();
-      // 手势状态
-      this.isDragging = false;
-      this.previousMouse = { x: 0, y: 0 };
-      this.spherical = new THREE.Spherical();
-      this.targetSpherical = new THREE.Spherical(12, Math.PI / 3, 0);
-      this.autoRotate = true;
-      this.autoRotateSpeed = 0.3;
+    // 手势状态
+    this.isDragging = false;
+    this.previousMouse = { x: 0, y: 0 };
+    this.spherical = new THREE.Spherical();
+    this.targetSpherical = new THREE.Spherical(8, Math.PI / 6, 0); // 从上方斜角俯视
+    this.autoRotate = true;
+    this.autoRotateSpeed = 0.3;
       this.setupEvents();
     }
 
