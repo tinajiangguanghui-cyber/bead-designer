@@ -366,8 +366,16 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 </script>
 
 <script>
-// 显示加载状态
-document.getElementById('hero-canvas').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
+// 诊断：确认Three.js加载状态
+(function() {
+  var diag = [];
+  diag.push('THREE loaded: ' + (typeof THREE !== 'undefined'));
+  diag.push('WebGL: ' + (function() { try { var c=document.createElement('canvas'); return !!(c.getContext('webgl')||c.getContext('webgl2')); } catch(e) { return false; } })());
+  
+  var hero = document.getElementById('hero-canvas');
+  hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;">📿<br><small style="color:#999;">THREE:' + (typeof THREE!=='undefined') + ' GL:' + diag[1].split(':')[1] + '</small></div>';
+  console.log('串珠妙计 诊断:', diag.join(', '));
+})();
 
 // === beadData.js ===
 // 珠子数据配置 - 5种材质 × 多种形状颜色
