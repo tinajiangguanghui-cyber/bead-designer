@@ -1858,29 +1858,28 @@ class App {
   }
 }
 
-// 启动应用 - 兼容多种加载时序
-
-
- else {
-  bootstrap();
-}
-
-// 导入THREE（全局引用，用于首页预览）
-
+// 启动应用
 window.THREE = THREE;
 
-
-// 启动应用
-window.addEventListener('DOMContentLoaded', function() {
-  console.log('App starting...');
+(function startApp() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+    return;
+  }
+  console.log('串珠妙计 starting...');
   try {
     window.app = new App();
     console.log('App started successfully');
   } catch(e) {
     console.error('App start error:', e);
-    document.getElementById('page-home').classList.add('active');
+    var home = document.getElementById('page-home');
+    if (home) home.classList.add('active');
+    var hero = document.getElementById('hero-canvas');
+    if (hero && !hero.querySelector('div')) {
+      hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
+    }
   }
-});
+})();
 </script>
 
 </body>
