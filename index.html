@@ -205,6 +205,19 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
+<!-- 超长提示弹窗 -->
+<div id="modal-overlength" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header"><h3>⚠️ 超出长度限制</h3><button class="btn-close" id="btn-close-overlength">&times;</button></div>
+    <p style="color:#666;margin-bottom:16px;line-height:1.6;" id="overlength-msg"></p>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary" id="btn-overlength-cancel" style="flex:1;">取消添加</button>
+      <button class="btn-primary" id="btn-overlength-force" style="flex:1;">继续添加</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -293,6 +306,12 @@ var app = {
     document.getElementById('btn-close-template').onclick = function(){ self.hideModal('modal-template'); };
     document.getElementById('btn-close-size').onclick = function(){ self.hideModal('modal-size'); };
     document.getElementById('btn-confirm-size').onclick = function(){ self.confirmSize(); };
+    document.getElementById('btn-close-overlength').onclick = function(){ self.hideModal('modal-overlength'); };
+    document.getElementById('btn-overlength-cancel').onclick = function(){ self.hideModal('modal-overlength'); self._pendingBead = null; };
+    document.getElementById('btn-overlength-force').onclick = function(){
+      self.hideModal('modal-overlength');
+      if(self._pendingBead){ self._doAddBead(self._pendingBead); self._pendingBead = null; }
+    };
     document.getElementById('btn-back').onclick = function(){ self.showPage('page-home'); };
     document.getElementById('btn-undo').onclick = function(){ self.undo(); };
     document.getElementById('btn-redo').onclick = function(){ self.redo(); };
@@ -425,6 +444,21 @@ var app = {
   },
 
   addBead: function(beadDef){
+    // 检查总长度
+    var newTotal = this.calcTotalLength() + beadDef.defaultSize + 0.5;
+    var limit = this.currentSize;
+    if(newTotal > limit){
+      this._pendingBead = beadDef;
+      var overBy = Math.round(newTotal - limit);
+      document.getElementById('overlength-msg').innerHTML =
+        '当前总长约 <b>'+this.calcTotalLength()+'mm</b>，添加「'+beadDef.name+'」('+beadDef.defaultSize+'mm) 后将超出限制 <b>'+overBy+'mm</b>（上限 '+limit+'mm）。<br><br>你可以：<br>· 继续添加（超出部分以红色标记）<br>· 取消，删除其他珠子后再添加';
+      this.showModal('modal-overlength');
+      return;
+    }
+    this._doAddBead(beadDef);
+  },
+
+  _doAddBead: function(beadDef){
     this.undoStack.push({type:'add',bead:{beadDef:beadDef,size:beadDef.defaultSize,color:beadDef.color}});
     this.redoStack = [];
     this.beads.push({beadDef:beadDef,size:beadDef.defaultSize,color:beadDef.color});
@@ -432,6 +466,12 @@ var app = {
     this.updateUndoRedo();
     this.drawPreview();
     this.showToast('已添加: '+beadDef.name);
+  },
+
+  calcTotalLength: function(){
+    var total = 0;
+    for(var i=0;i<this.beads.length;i++){ total += this.beads[i].size + 0.5; }
+    return Math.round(total);
   },
 
   deleteSelectedBead: function(){
@@ -602,6 +642,17 @@ var app = {
       }
       ctx.restore();
 
+      // 超长标记 - 红色边框
+      var currentLen = 0;
+      for(var j=0;j<=i;j++){ currentLen += beads[j].size + 0.5; }
+      if(currentLen > this.currentSize){
+        ctx.strokeStyle = 'rgba(231,76,60,0.7)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, s+3, 0, Math.PI*2);
+        ctx.stroke();
+      }
+
       // 珠孔
       ctx.fillStyle = '#1a1a2e';
       ctx.beginPath();
@@ -675,11 +726,17 @@ var app = {
   },
 
   updateInfo: function(){
+    var total = this.calcTotalLength();
+    var limit = this.currentSize;
     document.getElementById('bead-count').textContent = this.beads.length;
-    var total = 0;
-    this.beads.forEach(function(b){total+=b.size;});
-    total += this.beads.length * 0.5;
-    document.getElementById('total-length').textContent = Math.round(total);
+    var lenEl = document.getElementById('total-length');
+    lenEl.textContent = total;
+    if(total > limit){
+      lenEl.style.color = '#e74c3c';
+      lenEl.textContent = total + ' (超'+(total-limit)+'mm)';
+    } else {
+      lenEl.style.color = '#f0c78e';
+    }
   },
 
   updateUndoRedo: function(){
