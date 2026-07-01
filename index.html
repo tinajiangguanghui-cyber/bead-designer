@@ -457,6 +457,11 @@ var app = {
   },
 
   addBead: function(beadDef){
+    // 同一款珠子连续点击 → 跳过尺寸选择，直接用上次尺寸
+    if(this._lastBeadId === beadDef.id && this._lastBeadSize){
+      this._checkAndAddBead(beadDef, this._lastBeadSize);
+      return;
+    }
     this._pendingBeadDef = beadDef;
     this.openBeadSizeSelect(beadDef);
   },
@@ -495,7 +500,8 @@ var app = {
       size = activeBtn ? parseFloat(activeBtn.textContent) : 8;
     }
     this.hideModal('modal-bead-size');
-    this._lastBeadSize = size; // 记住本次选择的尺寸
+    this._lastBeadSize = size;
+    this._lastBeadId = this._pendingBeadDef.id; // 记住珠子ID，同款不再弹窗
     this._checkAndAddBead(this._pendingBeadDef, size);
   },
 
