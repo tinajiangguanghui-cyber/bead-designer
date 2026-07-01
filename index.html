@@ -465,8 +465,8 @@ var app = {
     document.getElementById('bead-size-title').textContent = '选择尺寸 - '+beadDef.name;
     var container = document.getElementById('bead-size-options');
     container.innerHTML = '';
-    // 4-15mm，每0.5mm一档
-    var defaultSize = beadDef.defaultSize || 8;
+    // 使用上次记忆的尺寸，否则用珠子默认尺寸
+    var defaultSize = this._lastBeadSize || beadDef.defaultSize || 8;
     for(var s=4; s<=15; s+=0.5){
       var btn = document.createElement('button');
       btn.className = 'size-opt'+(s===defaultSize?' active':'');
@@ -494,6 +494,7 @@ var app = {
       size = activeBtn ? parseFloat(activeBtn.textContent) : 8;
     }
     this.hideModal('modal-bead-size');
+    this._lastBeadSize = size; // 记住本次选择的尺寸
     this._checkAndAddBead(this._pendingBeadDef, size);
   },
 
@@ -682,15 +683,21 @@ var app = {
       }
     }
 
-    // 珠子大小自适应
-    var beadSize = Math.min(26, Math.max(10, (Math.min(w,h)*0.4)/N));
+    // 珠子按实际尺寸比例绘制 - 基准：8mm = 20px
+    var baseScale = 2.5; // 1mm = 2.5px
+    var minBeadPx = 8;   // 最小珠子像素
+
+    // 先清空 tooltip
+    var oldTooltip = document.getElementById('bead-tooltip');
+    if(oldTooltip) oldTooltip.remove();
 
     // 绘制珠子
     for(var i=0;i<N;i++){
       var bead = beads[i];
       var pos = positions[i];
       var colorHex = (BEAD_COLORS[bead.color]||{}).hex || '#ccc';
-      var s = beadSize;
+      // 按实际尺寸比例：1mm = baseScale px，最小minBeadPx px
+      var s = Math.max(minBeadPx, bead.size * baseScale);
 
       // 根据形状绘制
       ctx.save();
@@ -752,13 +759,65 @@ var app = {
       ctx.fill();
     }
 
+    // Hover 检测 - 在 Canvas 上添加 mousemove 事件显示 tooltip
+    (function(canvas, beadsRef, positionsRef, selfRef){
+      canvas.onmousemove = function(e){
+        var rect = canvas.getBoundingClientRect();
+        var mx = e.clientX - rect.left;
+        var my = e.clientY - rect.top;
+        var found = -1;
+        for(var k=0;k<beadsRef.length;k++){
+          var p = positionsRef[k];
+          var sr = Math.max(8, beadsRef[k].size * 2.5);
+          var dx = mx - p.x, dy = my - p.y;
+          if(dx*dx + dy*dy < sr*sr){ found = k; break; }
+        }
+        var tip = document.getElementById('bead-tooltip');
+        if(found>=0){
+          var b = beadsRef[found];
+          if(!tip){
+            tip = document.createElement('div');
+            tip.id = 'bead-tooltip';
+            tip.style.cssText = 'position:fixed;z-index:200;background:rgba(0,0,0,0.85);color:#fff;padding:6px 12px;border-radius:8px;font-size:12px;pointer-events:none;white-space:nowrap;';
+            document.body.appendChild(tip);
+          }
+          tip.textContent = b.beadDef.name + ' · ' + b.size + 'mm · ' + (BEAD_COLORS[b.color]||{}).name;
+          tip.style.left = (e.clientX+14)+'px';
+          tip.style.top = (e.clientY-30)+'px';
+          tip.style.display = 'block';
+          canvas.style.cursor = 'pointer';
+        } else {
+          if(tip) tip.style.display = 'none';
+          canvas.style.cursor = 'default';
+        }
+      };
+      canvas.onmouseleave = function(){
+        var tip = document.getElementById('bead-tooltip');
+        if(tip) tip.style.display = 'none';
+      };
+      // 点击珠子打开编辑
+      canvas.onclick = function(e){
+        var rect = canvas.getBoundingClientRect();
+        var mx = e.clientX - rect.left;
+        var my = e.clientY - rect.top;
+        for(var k=0;k<beadsRef.length;k++){
+          var p = positionsRef[k];
+          var sr = Math.max(8, beadsRef[k].size * 2.5);
+          var dx = mx - p.x, dy = my - p.y;
+          if(dx*dx + dy*dy < sr*sr){ selfRef.openBeadEdit(k); return; }
+        }
+      };
+    })(canvas, beads, positions, this);
+
     // 选中高亮
     if(this.selectedBeadIndex>=0 && this.selectedBeadIndex<positions.length){
       var sp = positions[this.selectedBeadIndex];
+      var selBead = beads[this.selectedBeadIndex];
+      var selR = Math.max(minBeadPx, selBead.size * baseScale);
       ctx.strokeStyle = '#f0c78e';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(sp.x, sp.y, beadSize+5, 0, Math.PI*2);
+      ctx.arc(sp.x, sp.y, selR+5, 0, Math.PI*2);
       ctx.stroke();
     }
   },
