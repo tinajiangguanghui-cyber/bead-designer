@@ -366,16 +366,8 @@ input { font-family: inherit; font-size: inherit; outline: none; }
 </script>
 
 <script>
-// 诊断：确认Three.js加载状态
-(function() {
-  var diag = [];
-  diag.push('THREE loaded: ' + (typeof THREE !== 'undefined'));
-  diag.push('WebGL: ' + (function() { try { var c=document.createElement('canvas'); return !!(c.getContext('webgl')||c.getContext('webgl2')); } catch(e) { return false; } })());
-  
-  var hero = document.getElementById('hero-canvas');
-  hero.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;">📿<br><small style="color:#999;">THREE:' + (typeof THREE!=='undefined') + ' GL:' + diag[1].split(':')[1] + '</small></div>';
-  console.log('串珠妙计 诊断:', diag.join(', '));
-})();
+// 显示加载状态
+document.getElementById('hero-canvas').innerHTML = '<div style="text-align:center;padding:60px 20px;color:#8b5e3c;font-size:48px;">📿</div>';
 
 // === beadData.js ===
 // 珠子数据配置 - 5种材质 × 多种形状颜色
@@ -581,7 +573,7 @@ class BeadRenderer {
 
     // 相机
     this.camera = new THREE.PerspectiveCamera(45, 2, 0.1, 100);
-    this.camera.position.set(0, 2.5, 12);
+    this.camera.position.set(0, 8, 0); // 正上方俯视
     this.camera.lookAt(0, 0, 0);
 
     // 渲染器 - 尝试创建WebGL上下文
@@ -621,7 +613,7 @@ class BeadRenderer {
       this.isDragging = false;
       this.previousMouse = { x: 0, y: 0 };
       this.spherical = new THREE.Spherical();
-      this.targetSpherical = new THREE.Spherical(12, Math.PI / 3, 0);
+      this.targetSpherical = new THREE.Spherical(8, Math.PI / 6, 0); // 斜上方俯视
       this.autoRotate = true;
       this.autoRotateSpeed = 0.3;
       this.setupEvents();
@@ -927,7 +919,7 @@ class BeadRenderer {
   }
 
   resetView() {
-    this.targetSpherical.set(12, Math.PI / 3, 0);
+    this.targetSpherical.set(8, Math.PI / 6, 0);
     this.autoRotate = true;
   }
 }
