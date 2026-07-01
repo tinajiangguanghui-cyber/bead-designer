@@ -128,6 +128,21 @@ input { font-family: inherit; font-size: inherit; outline: none; }
   </div>
 </div>
 
+<!-- 尺寸选择弹窗 -->
+<div id="modal-size" class="modal">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header"><h3 id="size-modal-title">选择尺寸</h3><button class="btn-close" id="btn-close-size">&times;</button></div>
+    <div class="edit-form">
+      <div class="edit-row"><label>预设尺寸</label><div class="size-options" id="preset-sizes"></div></div>
+      <div class="edit-row"><label>自定义尺寸 (mm)</label>
+        <input type="number" id="custom-size-input" placeholder="输入自定义尺寸" min="20" max="2000" style="padding:12px 16px;border-radius:10px;border:1.5px solid #ddd;font-size:15px;width:100%;margin-top:8px;">
+      </div>
+      <button class="btn-primary btn-block" id="btn-confirm-size">确认</button>
+    </div>
+  </div>
+</div>
+
 <div id="page-designer" class="page">
   <div class="designer-toolbar">
     <button class="btn-icon" id="btn-back">←</button>
@@ -204,6 +219,17 @@ const TEMPLATES = [
   { id:'phone_chain', name:'手机链', icon:'📱', category:'手机链', desc:'手机挂链' }
 ];
 
+// 每种饰品类型的预设尺寸配置 (mm)
+const SIZE_PRESETS = {
+  bracelet_single: { presets:[140, 160, 170], unit:'手围周长', min:80, max:250, default:160 },
+  bracelet_double: { presets:[280, 320, 340], unit:'手围周长', min:160, max:500, default:320 },
+  bracelet_triple: { presets:[420, 480, 510], unit:'手围周长', min:240, max:750, default:480 },
+  necklace_short: { presets:[380, 420, 450], unit:'链长', min:300, max:550, default:400 },
+  necklace_long: { presets:[550, 650, 750], unit:'链长', min:450, max:900, default:600 },
+  earring: { presets:[40, 55, 70], unit:'长度', min:25, max:120, default:50 },
+  phone_chain: { presets:[120, 150, 180], unit:'长度', min:80, max:300, default:150 }
+};
+
 const BEAD_COLORS = {
   red:{hex:'#c0392b',name:'红'}, orange:{hex:'#e67e22',name:'橙'}, yellow:{hex:'#f1c40f',name:'黄'},
   green:{hex:'#27ae60',name:'绿'}, blue:{hex:'#2980b9',name:'蓝'}, purple:{hex:'#8e44ad',name:'紫'},
@@ -247,6 +273,7 @@ function getWorksCount(){ return loadWorks().length; }
 var app = {
   currentTemplateId: 'bracelet_single',
   currentWorkId: null,
+  currentSize: 160,
   beads: [],
   activeFilter: 'all',
   exportBg: 'transparent',
@@ -264,6 +291,8 @@ var app = {
     document.getElementById('btn-start-design').onclick = function(){ self.showModal('modal-template'); self.renderTemplateGrid(); };
     document.getElementById('btn-my-works').onclick = function(){ self.showPage('page-works'); self.renderWorksList(); };
     document.getElementById('btn-close-template').onclick = function(){ self.hideModal('modal-template'); };
+    document.getElementById('btn-close-size').onclick = function(){ self.hideModal('modal-size'); };
+    document.getElementById('btn-confirm-size').onclick = function(){ self.confirmSize(); };
     document.getElementById('btn-back').onclick = function(){ self.showPage('page-home'); };
     document.getElementById('btn-undo').onclick = function(){ self.undo(); };
     document.getElementById('btn-redo').onclick = function(){ self.redo(); };
@@ -296,9 +325,56 @@ var app = {
       var item = document.createElement('div');
       item.className = 'template-item';
       item.innerHTML = '<div class="template-icon">'+tpl.icon+'</div><div class="template-name">'+tpl.name+'</div><div class="template-desc">'+tpl.desc+'</div>';
-      item.onclick = function(){ app.hideModal('modal-template'); app.startDesign(tpl.id); };
+      item.onclick = function(){ app.hideModal('modal-template'); app.openSizeSelect(tpl.id); };
       grid.appendChild(item);
     });
+  },
+
+  openSizeSelect: function(templateId){
+    this.currentTemplateId = templateId;
+    var cfg = SIZE_PRESETS[templateId];
+    var tpl = TEMPLATES.find(function(t){return t.id===templateId;});
+    document.getElementById('size-modal-title').textContent = (tpl?tpl.name:'')+' - 选择'+cfg.unit;
+
+    // 预设尺寸按钮
+    var container = document.getElementById('preset-sizes');
+    container.innerHTML = '';
+    cfg.presets.forEach(function(s){
+      var btn = document.createElement('button');
+      btn.className = 'size-opt'+(s===cfg.default?' active':'');
+      btn.textContent = s+'mm';
+      btn.onclick = function(){
+        document.querySelectorAll('#preset-sizes .size-opt').forEach(function(b){b.classList.remove('active');});
+        btn.classList.add('active');
+        document.getElementById('custom-size-input').value = '';
+      };
+      container.appendChild(btn);
+    });
+
+    document.getElementById('custom-size-input').value = '';
+    document.getElementById('custom-size-input').placeholder = '自定义 ('+cfg.min+'-'+cfg.max+'mm)';
+    document.getElementById('custom-size-input').min = cfg.min;
+    document.getElementById('custom-size-input').max = cfg.max;
+
+    this.showModal('modal-size');
+  },
+
+  confirmSize: function(){
+    var customVal = parseInt(document.getElementById('custom-size-input').value);
+    var cfg = SIZE_PRESETS[this.currentTemplateId];
+    if(customVal && customVal>=cfg.min && customVal<=cfg.max){
+      this.currentSize = customVal;
+    } else {
+      // 取选中的预设
+      var activePreset = document.querySelector('#preset-sizes .size-opt.active');
+      if(activePreset){
+        this.currentSize = parseInt(activePreset.textContent);
+      } else {
+        this.currentSize = cfg.default;
+      }
+    }
+    this.hideModal('modal-size');
+    this.startDesign(this.currentTemplateId);
   },
 
   startDesign: function(templateId){
@@ -308,7 +384,7 @@ var app = {
     this.undoStack = [];
     this.redoStack = [];
     var tpl = TEMPLATES.find(function(t){return t.id===templateId;});
-    document.getElementById('current-template-name').textContent = tpl?tpl.name:'手串·单圈';
+    document.getElementById('current-template-name').textContent = (tpl?tpl.name:'手串·单圈')+' · '+this.currentSize+'mm';
     this.showPage('page-designer');
     this.renderBeadList();
     this.updateInfo();
@@ -626,7 +702,7 @@ var app = {
 
   doSave: function(){
     var name = document.getElementById('input-work-name').value.trim() || '设计_'+new Date().toLocaleDateString('zh-CN').replace(/\//g,'');
-    var data = {templateId:this.currentTemplateId,beads:this.beads.map(function(b){return{beadId:b.beadDef.id,size:b.size,color:b.color};})};
+    var data = {templateId:this.currentTemplateId,size:this.currentSize,beads:this.beads.map(function(b){return{beadId:b.beadDef.id,size:b.size,color:b.color};})};
     if(this.currentWorkId){ updateWork(this.currentWorkId, data); }
     else { var w = addWork(name, data); this.currentWorkId = w.id; }
     this.hideModal('modal-save');
@@ -666,11 +742,12 @@ var app = {
     if(!work) return;
     this.currentWorkId = work.id;
     this.currentTemplateId = work.designData.templateId;
+    this.currentSize = work.designData.size || SIZE_PRESETS[work.designData.templateId].default;
     this.beads = work.designData.beads.map(function(b){var def=BEAD_LIBRARY.find(function(d){return d.id===b.beadId;});return def?{beadDef:def,size:b.size,color:b.color}:null;}).filter(Boolean);
     this.undoStack = [];
     this.redoStack = [];
     var tpl = TEMPLATES.find(function(t){return t.id===work.designData.templateId;});
-    document.getElementById('current-template-name').textContent = tpl?tpl.name:'手串·单圈';
+    document.getElementById('current-template-name').textContent = (tpl?tpl.name:'手串·单圈')+' · '+this.currentSize+'mm';
     this.showPage('page-designer');
     this.renderBeadList();
     this.updateInfo();
